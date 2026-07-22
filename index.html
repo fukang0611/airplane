@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101b1b" />
+    <title>Skybreaker // Air Combat</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23101a19'/%3E%3Cpath d='M32 7 39 25 55 35 39 38 36 56 32 49 28 56 25 38 9 35 25 25Z' fill='%2369f7d0'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="arcade-shell">
+      <aside class="systems-rail systems-rail--left" aria-label="任务状态">
+        <div class="rail-mark">
+          <span class="rail-kicker">AIRSPACE</span>
+          <strong>SECTOR 09</strong>
+          <span class="signal-dot">LIVE</span>
+        </div>
+
+        <div class="rail-stack">
+          <section class="rail-panel">
+            <span class="panel-label">PILOT SCORE</span>
+            <strong class="rail-value" id="railScore">000000</strong>
+            <span class="rail-sub">BEST <b id="bestScore">000000</b></span>
+          </section>
+          <section class="rail-panel rail-panel--tall">
+            <span class="panel-label">WEAPON BAY</span>
+            <div class="weapon-readout" id="weaponReadout">
+              <span class="weapon-swatch" id="weaponSwatch"></span>
+              <span>
+                <b id="weaponName">VULCAN</b>
+                <small id="weaponDetail">TWIN CANNON</small>
+              </span>
+              <em id="weaponLevel">I</em>
+            </div>
+          </section>
+        </div>
+
+        <div class="rail-footer">
+          <span>RANGE</span>
+          <b id="rangeReadout">00:00</b>
+        </div>
+      </aside>
+
+      <section class="game-stage" aria-label="Skybreaker 飞行战场">
+        <header class="stage-header">
+          <div class="stage-title"><span>SKY</span>BREAKER</div>
+          <div class="header-divider"></div>
+          <div class="stage-serial">ARC-09 / V1.0</div>
+          <button class="icon-button" id="pauseButton" type="button" aria-label="暂停游戏" title="暂停游戏">II</button>
+        </header>
+
+        <div class="game-frame" id="gameFrame">
+          <canvas id="gameCanvas" width="540" height="960" aria-label="竖屏飞机大战游戏画面"></canvas>
+          <div class="scanlines" aria-hidden="true"></div>
+          <div class="vignette" aria-hidden="true"></div>
+
+          <div class="game-hud" aria-live="polite">
+            <div class="hud-column hud-column--left">
+              <div class="hud-block">
+                <span>ARMOR</span>
+                <div class="armor-track"><i id="armorFill"></i></div>
+                <b id="armorText">100</b>
+              </div>
+              <div class="hud-block compact-block">
+                <span>CHAIN</span>
+                <b id="comboText">x1</b>
+              </div>
+            </div>
+            <div class="hud-column hud-column--right">
+              <div class="hud-block align-right">
+                <span>SCORE</span>
+                <b id="scoreText">000000</b>
+              </div>
+              <div class="bomb-row" id="bombRow" aria-label="特殊弹药数量"></div>
+            </div>
+          </div>
+
+          <div class="alert-banner" id="alertBanner" aria-live="assertive"></div>
+
+          <div class="game-overlay is-visible" id="gameOverlay" aria-hidden="false">
+            <div class="overlay-radar" aria-hidden="true"></div>
+            <div class="overlay-content" id="overlayContent">
+              <span class="overlay-index">OUTBOUND // 09</span>
+              <h1>SKY<br /><em>BREAKER</em></h1>
+              <p>HOSTILE AIRSPACE</p>
+              <button class="deploy-button" id="deployButton" type="button">
+                <span class="deploy-icon">&gt;</span>
+                <span id="deployLabel">出击</span>
+              </button>
+              <div class="key-glyphs" aria-label="键盘控制">
+                <span>←</span><span>↑</span><span>↓</span><span>→</span><span class="space-key">SPACE</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="mobile-special" id="mobileSpecial" type="button" aria-label="使用特殊弹药" title="使用特殊弹药">
+            <span></span>
+          </button>
+        </div>
+
+        <footer class="stage-footer">
+          <span class="footer-live"><i></i> ENGAGED</span>
+          <span id="footerWeapon">VULCAN / I</span>
+          <span id="footerWave">WAVE 01</span>
+        </footer>
+      </section>
+
+      <aside class="systems-rail systems-rail--right" aria-label="作战记录">
+        <div class="right-heading">
+          <span class="rail-kicker">THREAT MAP</span>
+          <strong>INBOUND</strong>
+        </div>
+        <div class="threat-map" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <span class="map-sweep"></span>
+        </div>
+        <section class="rail-panel rail-panel--stats">
+          <span class="panel-label">SORTIE DATA</span>
+          <div class="stat-line"><span>WAVE</span><b id="railWave">01</b></div>
+          <div class="stat-line"><span>ELIMS</span><b id="railElims">000</b></div>
+          <div class="stat-line"><span>ORDNANCE</span><b id="railBombs">03</b></div>
+        </section>
+        <div class="rail-footer rail-footer--right">
+          <span>CONTROL LINK</span>
+          <b>ONLINE</b>
+        </div>
+      </aside>
+    </main>
+
+    <script src="./src/game.js"></script>
+  </body>
+</html>
