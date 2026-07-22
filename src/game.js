@@ -72,7 +72,7 @@
     shake: 0,
     flash: 0,
     keys: new Set(),
-    pointer: { active: false, x: W / 2, y: H - 150 },
+    pointer: { active: false, id: null, lastX: 0, lastY: 0, deltaX: 0, deltaY: 0 },
     stars: [],
     streaks: [],
     bullets: [],
@@ -138,6 +138,17 @@
     };
   }
 
+  function resetPointerInput() {
+    Object.assign(state.pointer, {
+      active: false,
+      id: null,
+      lastX: 0,
+      lastY: 0,
+      deltaX: 0,
+      deltaY: 0,
+    });
+  }
+
   function resetGame() {
     state.score = 0;
     state.elapsed = 0;
@@ -164,6 +175,7 @@
     state.paused = false;
     state.gameOver = false;
     state.keys.clear();
+    resetPointerInput();
     initBackdrop();
     setAlert("AIRSPACE ENGAGED", "bright", 1.65);
     hideOverlay();
@@ -181,6 +193,7 @@
     state.paused = !state.paused;
     ui.pause.textContent = state.paused ? ">" : "II";
     if (state.paused) {
+      resetPointerInput();
       showOverlay("PAUSED", "HOLDING PATTERN", "继续", "resume");
     } else {
       hideOverlay();
@@ -213,6 +226,7 @@
   function endGame() {
     state.running = false;
     state.gameOver = true;
+    resetPointerInput();
     if (state.score > state.best) {
       state.best = state.score;
       storeBest();
@@ -369,17 +383,22 @@
     const right = state.keys.has("ArrowRight") || state.keys.has("KeyD");
     const up = state.keys.has("ArrowUp") || state.keys.has("KeyW");
     const down = state.keys.has("ArrowDown") || state.keys.has("KeyS");
-    let dx = (right ? 1 : 0) - (left ? 1 : 0);
-    let dy = (down ? 1 : 0) - (up ? 1 : 0);
-    if (state.pointer.active) {
-      dx = clamp((state.pointer.x - player.x) / 70, -1, 1);
-      dy = clamp((state.pointer.y - player.y) / 70, -1, 1);
-    }
-    const magnitude = Math.hypot(dx, dy) || 1;
+    const keyX = (right ? 1 : 0) - (left ? 1 : 0);
+    const keyY = (down ? 1 : 0) - (up ? 1 : 0);
+    const keyMagnitude = Math.hypot(keyX, keyY) || 1;
     const speed = 315;
-    player.x = clamp(player.x + (dx / magnitude) * speed * dt, 28, W - 28);
-    player.y = clamp(player.y + (dy / magnitude) * speed * dt, 120, H - 36);
-    player.tilt += (dx * 0.44 - player.tilt) * Math.min(1, dt * 10);
+    const pointerX = state.pointer.deltaX;
+    const pointerY = state.pointer.deltaY;
+    state.pointer.deltaX = 0;
+    state.pointer.deltaY = 0;
+
+    const previousX = player.x;
+    player.x = clamp(player.x + (keyX / keyMagnitude) * speed * dt + pointerX, 28, W - 28);
+    player.y = clamp(player.y + (keyY / keyMagnitude) * speed * dt + pointerY, 120, H - 36);
+    const tiltDirection = Math.abs(pointerX) > 0.01
+      ? clamp((player.x - previousX) / 18, -1, 1)
+      : keyX / keyMagnitude;
+    player.tilt += (tiltDirection * 0.44 - player.tilt) * Math.min(1, dt * 14);
     player.engine += dt * 20;
     player.invulnerable = Math.max(0, player.invulnerable - dt);
     player.specialCooldown = Math.max(0, player.specialCooldown - dt);
@@ -1029,7 +1048,30 @@
 
   function pointerPosition(event) {
     const rect = canvas.getBoundingClientRect();
-    return { x: clamp((event.clientX - rect.left) * W / rect.width, 0, W), y: clamp((event.clientY - rect.top) * H / rect.height, 0, H) };
+    return {
+      x: (event.clientX - rect.left) * W / rect.width,
+      y: (event.clientY - rect.top) * H / rect.height,
+    };
+  }
+
+  function updatePointerDelta(event) {
+    if (!state.pointer.active || event.pointerId !== state.pointer.id) return;
+    const position = pointerPosition(event);
+    state.pointer.deltaX += position.x - state.pointer.lastX;
+    state.pointer.deltaY += position.y - state.pointer.lastY;
+    state.pointer.lastX = position.x;
+    state.pointer.lastY = position.y;
+  }
+
+  function releasePointer(event, includeFinalPosition = false) {
+    if (!state.pointer.active || event.pointerId !== state.pointer.id) return;
+    if (includeFinalPosition) updatePointerDelta(event);
+    state.pointer.active = false;
+    state.pointer.id = null;
+    if (!includeFinalPosition) {
+      state.pointer.deltaX = 0;
+      state.pointer.deltaY = 0;
+    }
   }
 
   window.addEventListener("keydown", (event) => {
@@ -1049,20 +1091,31 @@
   window.addEventListener("keyup", (event) => state.keys.delete(event.code));
   window.addEventListener("blur", () => { if (state.running && !state.paused) pauseGame(); });
   window.addEventListener("resize", fitCanvas);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && state.running && !state.paused) pauseGame();
+  });
 
   canvas.addEventListener("pointerdown", (event) => {
-    if (!state.running || state.paused) return;
-    state.pointer.active = true;
-    Object.assign(state.pointer, pointerPosition(event));
+    if (!state.running || state.paused || state.pointer.active) return;
+    const position = pointerPosition(event);
+    Object.assign(state.pointer, {
+      active: true,
+      id: event.pointerId,
+      lastX: position.x,
+      lastY: position.y,
+      deltaX: 0,
+      deltaY: 0,
+    });
     canvas.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
     resumeAudio();
   });
   canvas.addEventListener("pointermove", (event) => {
-    if (!state.pointer.active) return;
-    Object.assign(state.pointer, pointerPosition(event));
+    updatePointerDelta(event);
   });
-  canvas.addEventListener("pointerup", () => { state.pointer.active = false; });
-  canvas.addEventListener("pointercancel", () => { state.pointer.active = false; });
+  canvas.addEventListener("pointerup", (event) => releasePointer(event, true));
+  canvas.addEventListener("pointercancel", (event) => releasePointer(event));
+  canvas.addEventListener("lostpointercapture", (event) => releasePointer(event));
   ui.deploy.addEventListener("click", startGame);
   ui.pause.addEventListener("click", pauseGame);
   ui.mobileSpecial.addEventListener("click", () => { resumeAudio(); triggerSpecial(); });
