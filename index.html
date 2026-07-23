@@ -76,7 +76,35 @@
             </div>
           </div>
 
+          <div class="combat-status" aria-live="polite">
+            <section class="status-card status-card--overdrive" id="overdriveCard">
+              <span><b id="overdriveLabel">GRAZE</b><em id="overdriveText">00%</em></span>
+              <div class="status-track"><i id="overdriveFill"></i></div>
+            </section>
+            <section class="status-card status-card--objective">
+              <span><b id="missionLabel">MISSION</b><em id="missionProgress">STANDBY</em></span>
+              <strong id="missionTitle">AWAITING DEPLOYMENT</strong>
+              <div class="status-track status-track--mission"><i id="missionFill"></i></div>
+              <small id="environmentLabel">AIRSPACE NOMINAL</small>
+            </section>
+            <section class="module-chip" id="moduleChip">
+              <span>TACTICAL</span>
+              <b id="moduleName">NO MODULE</b>
+            </section>
+          </div>
+
           <div class="alert-banner" id="alertBanner" aria-live="assertive"></div>
+
+          <section class="route-panel" id="routePanel" aria-hidden="true" aria-label="选择下一条航线">
+            <div class="route-panel__scan" aria-hidden="true"></div>
+            <div class="route-panel__content">
+              <span class="route-kicker" id="routeKicker">SECTOR CLEAR // CHOOSE VECTOR</span>
+              <h2>选择下一条航线</h2>
+              <p id="routeSummary">不同航线会改变下一关压力，并替换当前战术模块。</p>
+              <div class="route-options" id="routeOptions"></div>
+              <small id="signalReadout">ANOMALY SIGNAL 0 / 4</small>
+            </div>
+          </section>
 
           <div class="game-overlay is-visible" id="gameOverlay" aria-hidden="false">
             <div class="overlay-radar" aria-hidden="true"></div>

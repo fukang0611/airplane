@@ -253,10 +253,124 @@ button { font: inherit; }
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
+.combat-status {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  color: #eff8df;
+  font-family: var(--display);
+  pointer-events: none;
+}
+
+.status-card {
+  position: absolute;
+  border: 1px solid rgba(135, 229, 203, 0.3);
+  background: linear-gradient(90deg, rgba(5, 21, 20, 0.82), rgba(7, 29, 27, 0.58));
+  box-shadow: inset 3px 0 0 rgba(105, 247, 208, 0.32), 0 5px 16px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(4px);
+}
+
+.status-card span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #a8cabc;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.status-card span b { color: inherit; font-weight: 900; }
+.status-card span em { color: #eff8df; font-style: normal; }
+
+.status-card--overdrive {
+  top: 43px;
+  left: 50%;
+  width: 126px;
+  padding: 6px 8px 7px;
+  transform: translateX(-50%);
+}
+
+.status-track {
+  height: 4px;
+  margin-top: 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.status-track i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--aqua);
+  box-shadow: 0 0 8px var(--aqua);
+  transition: width 90ms linear, background 160ms ease;
+}
+
+.status-card--overdrive.is-active {
+  border-color: rgba(255, 214, 101, 0.86);
+  box-shadow: inset 3px 0 0 var(--yellow), 0 0 22px rgba(255, 214, 101, 0.28);
+}
+
+.status-card--overdrive.is-active span b,
+.status-card--overdrive.is-active span em { color: var(--yellow); }
+.status-card--overdrive.is-active .status-track i { background: var(--yellow); box-shadow: 0 0 11px var(--yellow); }
+
+.status-card--objective {
+  top: 73px;
+  left: 12px;
+  width: 176px;
+  padding: 7px 9px 8px;
+}
+
+.status-card--objective strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  color: #f1f2d9;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-card--objective small {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  color: #7fb4aa;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-track--mission { height: 2px; margin-top: 5px; }
+.status-card--objective.is-failed { border-color: rgba(255, 118, 95, 0.65); box-shadow: inset 3px 0 0 var(--coral); }
+.status-card--objective.is-complete { border-color: rgba(255, 214, 101, 0.7); box-shadow: inset 3px 0 0 var(--yellow); }
+
+.module-chip {
+  position: absolute;
+  bottom: 15px;
+  left: 14px;
+  display: grid;
+  min-width: 112px;
+  gap: 1px;
+  padding: 6px 9px 6px 12px;
+  border-left: 3px solid var(--cyan);
+  background: linear-gradient(90deg, rgba(5, 18, 18, 0.82), rgba(5, 18, 18, 0.18));
+  text-shadow: 0 1px 0 #071615;
+}
+
+.module-chip span { color: #7fa79e; font-size: 7px; font-weight: 800; letter-spacing: 0.09em; }
+.module-chip b { color: #dff8f0; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; }
+
 .alert-banner {
   position: absolute;
   z-index: 3;
-  top: 16.8%;
+  top: 22%;
   right: 18px;
   left: 18px;
   min-height: 18px;
@@ -278,9 +392,114 @@ button { font: inherit; }
 .alert-banner.danger { color: #ff927a; }
 .alert-banner.bright { color: #71f7d1; }
 
+.route-panel {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+  place-items: center;
+  padding: 28px;
+  background:
+    linear-gradient(180deg, rgba(3, 14, 14, 0.92), rgba(7, 25, 23, 0.96)),
+    repeating-linear-gradient(90deg, transparent 0 35px, rgba(105, 247, 208, 0.06) 35px 36px);
+}
+
+.route-panel.is-visible { display: grid; }
+
+.route-panel__scan {
+  position: absolute;
+  inset: -35%;
+  opacity: 0.35;
+  background:
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 8%, rgba(105, 247, 208, 0.16) 8.2% 8.45%, transparent 8.7% 14%),
+    conic-gradient(from 20deg at 50% 50%, transparent 0 10deg, rgba(105, 247, 208, 0.18) 11deg 16deg, transparent 17deg 360deg);
+  animation: radar-spin 13s linear infinite;
+}
+
+.route-panel__content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 410px);
+}
+
+.route-kicker {
+  display: block;
+  color: var(--aqua);
+  font-family: var(--display);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.route-panel h2 {
+  margin: 8px 0 5px;
+  color: #f1f0d9;
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.route-panel p {
+  margin: 0 0 18px;
+  color: #9db8ae;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.route-options { display: grid; gap: 10px; }
+
+.route-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid rgba(105, 247, 208, 0.34);
+  border-left: 4px solid var(--route-color, var(--aqua));
+  border-radius: 0;
+  background: rgba(13, 38, 35, 0.74);
+  color: #ecf4df;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.route-option:hover,
+.route-option:focus-visible {
+  outline: none;
+  border-color: var(--route-color, var(--aqua));
+  background: rgba(24, 62, 55, 0.92);
+  transform: translateX(4px);
+}
+
+.route-option__index {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--route-color, var(--aqua));
+  color: var(--route-color, var(--aqua));
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.route-option b,
+.route-option small,
+.route-option em { display: block; font-family: var(--display); }
+.route-option b { color: #f1f2dd; font-size: 13px; font-weight: 900; }
+.route-option small { margin-top: 3px; color: #9eb8ae; font-size: 8px; line-height: 1.35; }
+.route-option em { color: var(--route-color, var(--aqua)); font-size: 8px; font-style: normal; font-weight: 900; text-align: right; }
+.route-panel__content > small { display: block; margin-top: 15px; color: #7d9a91; font-family: var(--display); font-size: 8px; font-weight: 800; letter-spacing: 0.08em; }
+
 .game-overlay {
   position: absolute;
-  z-index: 4;
+  z-index: 7;
   inset: 0;
   display: grid;
   overflow: hidden;
@@ -626,10 +845,19 @@ button { font: inherit; }
   .hud-block > b { font-size: 14px; }
   .hud-block > span { font-size: 8px; }
   .armor-track { width: 56px; }
+  .status-card--overdrive { top: 38px; width: 104px; padding: 5px 7px 6px; }
+  .status-card--objective { top: 67px; left: 9px; width: 164px; padding: 6px 8px 7px; }
+  .status-card--objective strong { font-size: 9px; }
+  .module-chip { bottom: 12px; left: 10px; min-width: 96px; padding: 5px 7px 5px 10px; }
+  .route-panel { padding: 18px; }
+  .route-panel h2 { font-size: 25px; }
+  .route-panel p { margin-bottom: 13px; font-size: 9px; }
+  .route-option { min-height: 65px; grid-template-columns: 29px 1fr auto; gap: 8px; padding: 8px 9px; }
+  .route-option__index { width: 26px; height: 26px; font-size: 13px; }
   .overlay-content p { margin: 17px 0 21px; font-size: 9px; }
   .overlay-content h1 { font-size: 50px; }
   .key-glyphs { margin-top: 21px; }
-  .alert-banner { top: 15%; }
+  .alert-banner { top: 22%; }
 }
 
 @media (max-height: 660px) and (max-width: 960px) {

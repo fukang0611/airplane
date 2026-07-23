@@ -34,6 +34,22 @@
     footerWave: document.querySelector("#footerWave"),
     stageSerial: document.querySelector("#stageSerial"),
     railSector: document.querySelector("#railSector"),
+    overdriveCard: document.querySelector("#overdriveCard"),
+    overdriveLabel: document.querySelector("#overdriveLabel"),
+    overdriveFill: document.querySelector("#overdriveFill"),
+    overdriveText: document.querySelector("#overdriveText"),
+    missionLabel: document.querySelector("#missionLabel"),
+    missionProgress: document.querySelector("#missionProgress"),
+    missionTitle: document.querySelector("#missionTitle"),
+    missionFill: document.querySelector("#missionFill"),
+    environmentLabel: document.querySelector("#environmentLabel"),
+    moduleName: document.querySelector("#moduleName"),
+    moduleChip: document.querySelector("#moduleChip"),
+    routePanel: document.querySelector("#routePanel"),
+    routeKicker: document.querySelector("#routeKicker"),
+    routeSummary: document.querySelector("#routeSummary"),
+    routeOptions: document.querySelector("#routeOptions"),
+    signalReadout: document.querySelector("#signalReadout"),
   };
 
   const weaponDefs = {
@@ -58,6 +74,7 @@
     tempest: { hp: 1750, r: 70, speed: 92, score: 5600, color: "#90dfff", boss: true, motion: "tempest", attack: "tempest", cadence: 1.32, bullet: "spark", bossTitle: "TEMPEST FORTRESS" },
     dreadnought: { hp: 2200, r: 78, speed: 84, score: 7000, color: "#ff8c62", boss: true, motion: "dreadnought", attack: "dreadnought", cadence: 1.28, bullet: "shell", bossTitle: "FOUNDRY DREADNOUGHT" },
     core: { hp: 2700, r: 65, speed: 76, score: 9000, color: "#c8a6ff", boss: true, motion: "core", attack: "core", cadence: 1.05, bullet: "orb", bossTitle: "RIFT COMMAND CORE" },
+    seraph: { hp: 3600, r: 72, speed: 88, score: 15000, color: "#f0dcff", boss: true, motion: "seraph", attack: "seraph", cadence: 0.92, bullet: "orb", bossTitle: "NULL SERAPH // HIDDEN SIGNAL" },
   };
 
   const levelDefs = [
@@ -72,6 +89,9 @@
         { label: "BREAKWATER", groups: [{ type: "fighter", formation: "arc", count: 5 }, { type: "scout", formation: "vee", count: 5, gap: 0.58 }] },
       ],
       boss: "carrier",
+      environment: { type: "slipstream", name: "NEON SLIPSTREAMS" },
+      mission: { type: "escort", title: "ESCORT // AEGIS-7", target: 100 },
+      routes: ["harborSafe", "harborRisk"],
     },
     {
       name: "STORM FRONT",
@@ -84,6 +104,9 @@
         { label: "DOWNDRAFT", groups: [{ type: "striker", formation: "line", count: 5 }, { type: "skimmer", formation: "flank", count: 6, gap: 0.58 }] },
       ],
       boss: "tempest",
+      environment: { type: "lightning", name: "CHAIN LIGHTNING" },
+      mission: { type: "pursuit", title: "INTERCEPT // STORM COURIERS", target: 4, targetType: "skimmer" },
+      routes: ["stormSafe", "stormRisk"],
     },
     {
       name: "CRIMSON FORGE",
@@ -96,6 +119,9 @@
         { label: "PRESSURE GATE", groups: [{ type: "turret", formation: "arc", count: 5 }, { type: "bomber", formation: "flank", count: 4, gap: 0.68 }] },
       ],
       boss: "dreadnought",
+      environment: { type: "heat", name: "THERMAL VENT GRID" },
+      mission: { type: "sabotage", title: "SABOTAGE // FURNACE NODES", target: 3, targetType: "turret" },
+      routes: ["forgeSafe", "forgeRisk"],
     },
     {
       name: "VOID GATE",
@@ -108,6 +134,9 @@
         { label: "LAST VECTOR", groups: [{ type: "prism", formation: "stagger", count: 5 }, { type: "wraith", formation: "vee", count: 7, gap: 0.62 }] },
       ],
       boss: "core",
+      environment: { type: "gravity", name: "GRAVITY WELLS" },
+      mission: { type: "escape", title: "ESCAPE // COLLAPSE WINDOW", target: 24 },
+      routes: ["riftSafe", "riftRisk"],
     },
   ];
 
@@ -116,6 +145,53 @@
     storm: { sky: ["#1a3447", "#0b1b35", "#050c1d"], stars: ["#d6f3ff", "#78c7ff", "#efffbc", "#91aef8"], line: "#8ee6ff", accent: "#b4e7ff" },
     forge: { sky: ["#3b211b", "#241411", "#0c0a0a"], stars: ["#ffba6f", "#ff6f5d", "#ffd27a", "#d58d69"], line: "#ff9b5f", accent: "#ffdd8a" },
     rift: { sky: ["#14283a", "#0e1530", "#050712"], stars: ["#92f1df", "#b9b1ff", "#e5d3ff", "#7acffd"], line: "#96e9dc", accent: "#d4a7ff" },
+  };
+
+  const moduleDefs = {
+    none: { name: "NO MODULE", detail: "STANDARD FRAME", color: "#8aa59d" },
+    aegis: { name: "AEGIS SHELL", detail: "BLOCKS ONE HIT EACH SECTOR", color: "#69f7d0" },
+    reactor: { name: "GRAZE REACTOR", detail: "FASTER, LONGER OVERDRIVE", color: "#ffd665" },
+    nanoforge: { name: "NANOFORGE", detail: "REPAIRS ARMOR BETWEEN WAVES", color: "#7de9ff" },
+    arsenal: { name: "ARSENAL LINK", detail: "INCREASED WEAPON CYCLING", color: "#ff9b69" },
+    magnet: { name: "SALVAGE MAGNET", detail: "ATTRACTS PICKUPS AND LOCKS CORES", color: "#9cf0d9" },
+    phase: { name: "PHASE VEIL", detail: "GRAZES GRANT A PHASE WINDOW", color: "#d4a7ff" },
+  };
+
+  const routeDefs = {
+    harborSafe: { name: "CONVOY LANE", detail: "Repair 30 armor and load one ion cell.", module: "aegis", pressure: -0.04, score: 1, repair: 30, bombs: 1, color: "#69f7d0", tag: "STABLE" },
+    harborRisk: { name: "THUNDER BREACH", detail: "Enter a denser storm with a charged reactor.", module: "reactor", pressure: 0.16, score: 1.25, charge: 38, color: "#ffd665", tag: "RISK +25%" },
+    stormSafe: { name: "COOLANT BYPASS", detail: "Restore 35 armor and install autonomous repair.", module: "nanoforge", pressure: 0, score: 1.05, repair: 35, color: "#7de9ff", tag: "RECOVERY" },
+    stormRisk: { name: "FOUNDRY RAID", detail: "Faster weapons against reinforced formations.", module: "arsenal", pressure: 0.2, score: 1.3, color: "#ff9b69", tag: "RISK +30%" },
+    forgeSafe: { name: "WARDEN CORRIDOR", detail: "Secure salvage and load an additional ion cell.", module: "magnet", pressure: 0.04, score: 1.1, repair: 18, bombs: 1, color: "#9cf0d9", tag: "SALVAGE" },
+    forgeRisk: { name: "RIFT SLINGSHOT", detail: "Phase through a volatile anomaly for a score surge.", module: "phase", pressure: 0.24, score: 1.38, charge: 56, color: "#d4a7ff", tag: "RISK +38%" },
+    riftSafe: { name: "DAWN RETURN", detail: "Re-arm the Aegis shell before the next combat cycle.", module: "aegis", pressure: 0.08, score: 1.15, repair: 40, bombs: 1, color: "#69f7d0", tag: "CYCLE SAFE" },
+    riftRisk: { name: "ECHO DESCENT", detail: "Descend deeper; every formation mutates faster.", module: "reactor", pressure: 0.3, score: 1.55, charge: 70, color: "#ff7ee5", tag: "CYCLE +55%" },
+  };
+
+  const bossPartDefs = {
+    carrier: [
+      { id: "port-battery", label: "PORT BATTERY", x: -53, y: 20, r: 18, hp: 250, role: "gun" },
+      { id: "starboard-battery", label: "STARBOARD BATTERY", x: 53, y: 20, r: 18, hp: 250, role: "gun" },
+    ],
+    tempest: [
+      { id: "port-rotor", label: "PORT ROTOR", x: -49, y: 12, r: 19, hp: 290, role: "gun" },
+      { id: "starboard-rotor", label: "STARBOARD ROTOR", x: 49, y: 12, r: 19, hp: 290, role: "gun" },
+    ],
+    dreadnought: [
+      { id: "port-cannon", label: "PORT CANNON", x: -53, y: 18, r: 19, hp: 350, role: "gun" },
+      { id: "furnace-plate", label: "FURNACE PLATE", x: 0, y: -28, r: 18, hp: 430, role: "shield" },
+      { id: "starboard-cannon", label: "STARBOARD CANNON", x: 53, y: 18, r: 19, hp: 350, role: "gun" },
+    ],
+    core: [
+      { id: "rift-node-a", label: "RIFT NODE A", orbit: 59, angle: -Math.PI / 2, orbitSpeed: 0.72, r: 15, hp: 340, role: "node" },
+      { id: "rift-node-b", label: "RIFT NODE B", orbit: 59, angle: Math.PI / 6, orbitSpeed: 0.72, r: 15, hp: 340, role: "node" },
+      { id: "rift-node-c", label: "RIFT NODE C", orbit: 59, angle: Math.PI * 5 / 6, orbitSpeed: 0.72, r: 15, hp: 340, role: "node" },
+    ],
+    seraph: [
+      { id: "left-halo", label: "LEFT HALO", orbit: 66, angle: Math.PI, orbitSpeed: -0.9, r: 16, hp: 420, role: "node" },
+      { id: "crown", label: "SERAPH CROWN", x: 0, y: -44, r: 17, hp: 520, role: "shield" },
+      { id: "right-halo", label: "RIGHT HALO", orbit: 66, angle: 0, orbitSpeed: -0.9, r: 16, hp: 420, role: "node" },
+    ],
   };
 
   const state = {
@@ -152,6 +228,23 @@
     backdropTime: 0,
     weatherFlash: 0,
     nextWeatherFlash: 5,
+    overdriveCharge: 0,
+    overdrive: 0,
+    overdriveMax: 0,
+    grazes: 0,
+    environment: null,
+    hazards: [],
+    mission: null,
+    ally: null,
+    signalFragments: 0,
+    missionSuccesses: 0,
+    bossPartsDestroyed: 0,
+    module: "none",
+    moduleCooldown: 0,
+    routeModifier: { pressure: 0, score: 1 },
+    routeOpen: false,
+    secretBossActive: false,
+    secretBossDefeated: false,
     bullets: [],
     enemyBullets: [],
     enemies: [],
@@ -187,9 +280,45 @@
   function currentCycle() { return Math.floor((state.level - 1) / levelDefs.length); }
   function currentDifficulty() {
     const cycleStep = levelDefs[levelDefs.length - 1].difficulty - levelDefs[0].difficulty + 0.28;
-    return currentLevelDef().difficulty + currentCycle() * cycleStep;
+    return currentLevelDef().difficulty + currentCycle() * cycleStep + (state.routeModifier?.pressure || 0);
   }
   function levelLabel() { return `LEVEL ${String(state.level).padStart(2, "0")}`; }
+
+  function addOverdrive(amount) {
+    if (!state.running || !state.player) return;
+    const reactorBoost = state.module === "reactor" ? 1.35 : 1;
+    if (state.overdrive > 0) {
+      state.overdrive = Math.min(state.overdriveMax, state.overdrive + amount * 0.012 * reactorBoost);
+      return;
+    }
+    state.overdriveCharge = clamp(state.overdriveCharge + amount * reactorBoost, 0, 100);
+    if (state.overdriveCharge < 100) return;
+    state.overdriveMax = state.module === "reactor" ? 9 : 7;
+    state.overdrive = state.overdriveMax;
+    state.overdriveCharge = 100;
+    state.flash = Math.max(state.flash, 0.2);
+    state.shake = Math.max(state.shake, 5);
+    state.rings.push({ x: state.player.x, y: state.player.y, r: 8, max: 155, life: 0.48, maxLife: 0.48, color: "#ffd665", damage: 18, hits: new Set() });
+    setAlert("OVERDRIVE // WEAPONS FREE", "bright", 1.5);
+    tone("overdrive");
+    navigator.vibrate?.(24);
+  }
+
+  function registerGraze(bullet) {
+    if (bullet.grazed || state.overdrive > 0) return;
+    bullet.grazed = true;
+    state.grazes += 1;
+    state.score += 18 * Math.max(1, state.combo);
+    addOverdrive(4.2);
+    if (state.module === "phase" && state.moduleCooldown <= 0 && state.player) {
+      state.player.invulnerable = Math.max(state.player.invulnerable, 0.2);
+      state.moduleCooldown = 0.62;
+    }
+    if (state.grazes % 4 === 0) {
+      state.floating.push({ x: state.player.x, y: state.player.y - 34, text: `GRAZE ${state.grazes}`, color: "#ffd665", life: 0.54, maxLife: 0.54 });
+      tone("graze", 0.022);
+    }
+  }
 
   function initBackdrop() {
     const theme = currentTheme();
@@ -200,6 +329,59 @@
     state.backdropTime = 0;
     state.weatherFlash = 0;
     state.nextWeatherFlash = random(3.8, 7.5);
+  }
+
+  function initEnvironment() {
+    const environment = currentLevelDef().environment;
+    state.environment = {
+      type: environment.type,
+      name: environment.name,
+      timer: environment.type === "slipstream" ? 2.2 : 3.2,
+      pulse: 0,
+    };
+    state.hazards = [];
+  }
+
+  function initMission() {
+    const definition = currentLevelDef().mission;
+    const cycleBonus = currentCycle();
+    const target = definition.type === "escape"
+      ? definition.target + cycleBonus * 5
+      : definition.type === "escort"
+        ? definition.target
+        : definition.target + cycleBonus;
+    state.mission = {
+      ...definition,
+      target,
+      progress: definition.type === "escort" ? 100 : 0,
+      assigned: 0,
+      missed: 0,
+      resolved: false,
+      success: false,
+      status: "ACTIVE",
+    };
+    state.ally = definition.type === "escort"
+      ? { x: W / 2, y: H - 265, baseY: H - 265, r: 24, hp: 140, maxHp: 140, age: 0, damaged: 0, dead: false }
+      : null;
+  }
+
+  function resolveMission(success, detail) {
+    const mission = state.mission;
+    if (!mission || mission.resolved) return;
+    mission.resolved = true;
+    mission.success = success;
+    mission.status = success ? "COMPLETE" : "FAILED";
+    if (success) {
+      state.signalFragments = Math.min(4, state.signalFragments + 1);
+      state.missionSuccesses += 1;
+      state.score += 1200 * (currentCycle() + 1);
+      addOverdrive(28);
+      setAlert(`MISSION COMPLETE // SIGNAL ${state.signalFragments}/4`, "bright", 1.65);
+      tone("mission");
+    } else {
+      setAlert(`MISSION LOST // ${detail || mission.title}`, "danger", 1.65);
+      tone("warning");
+    }
   }
 
   function fitCanvas() {
@@ -222,6 +404,7 @@
       fireCooldown: 0.1,
       specialCooldown: 0,
       invulnerable: 1.5,
+      moduleCharges: 0,
       tilt: 0,
       engine: 0,
     };
@@ -239,7 +422,13 @@
   }
 
   function startLevel(level) {
+    const previousCycle = currentCycle();
     state.level = level;
+    if (currentCycle() !== previousCycle) {
+      state.signalFragments = 0;
+      state.secretBossActive = false;
+      state.secretBossDefeated = false;
+    }
     state.levelPhase = "intro";
     state.phaseTimer = 2.15;
     state.waveIndex = -1;
@@ -248,11 +437,17 @@
     state.spawnQueue = [];
     state.bossActive = false;
     state.bossDefeated = false;
+    state.routeOpen = false;
+    ui.routePanel.classList.remove("is-visible");
+    ui.routePanel.setAttribute("aria-hidden", "true");
     state.enemyBullets = [];
     initBackdrop();
+    initEnvironment();
+    initMission();
+    if (state.player) state.player.moduleCharges = state.module === "aegis" ? 1 : 0;
     const def = currentLevelDef();
-    const overdrive = state.level > levelDefs.length ? " // OVERDRIVE" : "";
-    setAlert(`${levelLabel()} // ${def.name}${overdrive}`, "bright", 2.15);
+    const cycle = currentCycle() > 0 ? ` // CYCLE ${currentCycle() + 1}` : "";
+    setAlert(`${levelLabel()} // ${def.name}${cycle}`, "bright", 2.15);
     tone("level");
   }
 
@@ -269,6 +464,23 @@
     state.alertTimer = 0;
     state.shake = 0;
     state.flash = 0;
+    state.overdriveCharge = 0;
+    state.overdrive = 0;
+    state.overdriveMax = 0;
+    state.grazes = 0;
+    state.signalFragments = 0;
+    state.missionSuccesses = 0;
+    state.bossPartsDestroyed = 0;
+    state.module = "none";
+    state.moduleCooldown = 0;
+    state.routeModifier = { pressure: 0, score: 1 };
+    state.routeOpen = false;
+    state.secretBossActive = false;
+    state.secretBossDefeated = false;
+    state.environment = null;
+    state.hazards = [];
+    state.mission = null;
+    state.ally = null;
     state.bullets = [];
     state.enemyBullets = [];
     state.enemies = [];
@@ -294,7 +506,7 @@
   }
 
   function pauseGame() {
-    if (!state.running || state.gameOver) return;
+    if (!state.running || state.gameOver || state.routeOpen) return;
     state.paused = !state.paused;
     ui.pause.textContent = state.paused ? ">" : "II";
     if (state.paused) {
@@ -354,6 +566,81 @@
     ui.alert.textContent = "";
   }
 
+  function finishMissionBeforeBoss() {
+    const mission = state.mission;
+    if (!mission || mission.resolved) return;
+    if (mission.type === "escort") resolveMission(Boolean(state.ally && !state.ally.dead), "ESCORT LOST");
+    else resolveMission(mission.progress >= mission.target, `${mission.progress}/${mission.target}`);
+  }
+
+  function shouldUnlockSecretBoss(enemy) {
+    return enemy.type === currentLevelDef().boss
+      && state.level % levelDefs.length === 0
+      && state.signalFragments >= 4
+      && !state.secretBossActive
+      && !state.secretBossDefeated;
+  }
+
+  function startSecretBoss() {
+    state.levelPhase = "secret-boss";
+    state.bossActive = true;
+    state.secretBossActive = true;
+    spawnEnemy("seraph", { x: W / 2, y: -110, secret: true });
+    setAlert("HIDDEN CONTACT // NULL SERAPH", "danger", 2.2);
+    tone("boss");
+  }
+
+  function openRouteChoice() {
+    const routeKeys = currentLevelDef().routes;
+    state.levelPhase = "route";
+    state.routeOpen = true;
+    resetPointerInput();
+    ui.routeKicker.textContent = state.level % levelDefs.length === 0
+      ? `COMBAT CYCLE ${currentCycle() + 1} COMPLETE // SELECT DESCENT`
+      : `${levelLabel()} SECURED // SELECT VECTOR`;
+    ui.routeSummary.textContent = state.mission?.success
+      ? "支线任务已完成，异常信号已经稳定。航线会替换当前战术模块并改变下一关压力。"
+      : "支线任务未完成，但仍可继续推进。选择补给航线，或以更高压力换取更高得分。";
+    ui.signalReadout.textContent = `ANOMALY SIGNAL ${state.signalFragments} / 4${state.signalFragments >= 4 ? " // LOCKED" : ""}`;
+    ui.routeOptions.innerHTML = routeKeys.map((key, index) => {
+      const route = routeDefs[key];
+      const module = moduleDefs[route.module];
+      return `
+        <button class="route-option" type="button" data-route="${key}" style="--route-color: ${route.color}">
+          <span class="route-option__index">${index + 1}</span>
+          <span><b>${route.name}</b><small>${route.detail}</small></span>
+          <em>${route.tag}<br />${module.name}</em>
+        </button>
+      `;
+    }).join("");
+    ui.routePanel.classList.add("is-visible");
+    ui.routePanel.setAttribute("aria-hidden", "false");
+    ui.routeOptions.querySelectorAll("[data-route]").forEach((button) => {
+      button.addEventListener("click", () => selectRoute(button.dataset.route), { once: true });
+    });
+    ui.routeOptions.querySelector("button")?.focus({ preventScroll: true });
+    tone("route");
+  }
+
+  function selectRoute(key) {
+    if (!state.routeOpen || !routeDefs[key]) return;
+    const route = routeDefs[key];
+    const player = state.player;
+    state.routeOpen = false;
+    state.routeModifier = { pressure: route.pressure, score: route.score };
+    state.module = route.module;
+    if (player) {
+      if (route.repair) player.hp = Math.min(100, player.hp + route.repair);
+      if (route.bombs) player.bombs = Math.min(5, player.bombs + route.bombs);
+    }
+    ui.routePanel.classList.remove("is-visible");
+    ui.routePanel.setAttribute("aria-hidden", "true");
+    startLevel(state.level + 1);
+    if (route.charge) addOverdrive(route.charge);
+    state.floating.push({ x: W / 2, y: 245, text: moduleDefs[route.module].name, color: route.color, life: 1.8, maxLife: 1.8 });
+    tone("route");
+  }
+
   function formationSlots(formation, count) {
     const spacing = Math.min(72, 360 / Math.max(1, count - 1));
     const middle = (count - 1) / 2;
@@ -381,7 +668,8 @@
       const interval = group.interval || 0.12;
       const groupPhase = random(0, TAU);
       formationSlots(group.formation, group.count).forEach((slot, index) => {
-        queue.push({ at: cursor + index * interval, type: group.type, phase: groupPhase, ...slot });
+        const elite = currentCycle() > 0 && index < Math.min(currentCycle(), 2) && (groupIndex + index) % 2 === 0;
+        queue.push({ at: cursor + index * interval, type: group.type, phase: groupPhase, elite, ...slot });
       });
       cursor += group.count * interval;
     });
@@ -394,12 +682,17 @@
     state.waveIndex += 1;
     const level = currentLevelDef();
     if (state.waveIndex >= level.waves.length) {
+      finishMissionBeforeBoss();
       state.levelPhase = "boss-warning";
       state.phaseTimer = 2.35;
       state.spawnQueue = [];
       setAlert(`WARNING // ${enemyDefs[level.boss].bossTitle}`, "danger", 2.35);
       tone("warning");
       return;
+    }
+    if (state.waveIndex > 0 && state.module === "nanoforge" && state.player) {
+      state.player.hp = Math.min(100, state.player.hp + 14);
+      state.floating.push({ x: state.player.x, y: state.player.y - 36, text: "NANOFORGE +14", color: moduleDefs.nanoforge.color, life: 0.9, maxLife: 0.9 });
     }
     const wave = level.waves[state.waveIndex];
     state.levelPhase = "waves";
@@ -419,11 +712,28 @@
   }
 
   function completeLevel(enemy) {
-    if (state.levelPhase !== "boss" || state.bossDefeated) return;
+    if (!enemy.boss || state.bossDefeated) return;
+    if (shouldUnlockSecretBoss(enemy)) {
+      state.bossActive = false;
+      state.hazards = [];
+      state.levelPhase = "secret-warning";
+      state.phaseTimer = 2.8;
+      state.enemyBullets.forEach((bullet) => { bullet.dead = true; });
+      state.flash = 0.24;
+      setAlert("ANOMALY SIGNAL COMPLETE // SOMETHING ANSWERED", "danger", 2.8);
+      state.floating.push({ x: W / 2, y: 275, text: "HIDDEN VECTOR OPEN", color: "#f0dcff", life: 2.4, maxLife: 2.4 });
+      tone("warning");
+      return;
+    }
+    if (enemy.type === "seraph") {
+      state.secretBossDefeated = true;
+      state.secretBossActive = false;
+    }
     state.bossDefeated = true;
     state.bossActive = false;
+    state.hazards = [];
     state.levelPhase = "clear";
-    state.phaseTimer = 3;
+    state.phaseTimer = 2.65;
     state.enemyBullets.forEach((bullet) => { bullet.dead = true; });
     state.flash = 0.28;
     setAlert(`${levelLabel()} CLEAR // ${currentLevelDef().name}`, "bright", 3);
@@ -457,18 +767,71 @@
       if (state.phaseTimer <= 0) startBoss();
       return;
     }
+    if (state.levelPhase === "secret-warning") {
+      state.phaseTimer -= dt;
+      if (state.phaseTimer <= 0) startSecretBoss();
+      return;
+    }
     if (state.levelPhase === "clear") {
       state.phaseTimer -= dt;
-      if (state.phaseTimer <= 0) startLevel(state.level + 1);
+      if (state.phaseTimer <= 0) openRouteChoice();
     }
+  }
+
+  function makeBossParts(type, hpScale) {
+    return (bossPartDefs[type] || []).map((part) => {
+      const maxHp = Math.round(part.hp * hpScale * 0.78);
+      return { ...part, hp: maxHp, maxHp, dead: false, damaged: 0 };
+    });
+  }
+
+  function bossPartPosition(enemy, part) {
+    if (part.orbit) {
+      const angle = part.angle + enemy.age * part.orbitSpeed;
+      return { x: enemy.x + Math.cos(angle) * part.orbit, y: enemy.y + Math.sin(angle) * part.orbit };
+    }
+    return { x: enemy.x + part.x, y: enemy.y + part.y };
+  }
+
+  function aliveBossParts(enemy, role) {
+    return (enemy.parts || []).filter((part) => !part.dead && (!role || part.role === role));
+  }
+
+  function bossStage(enemy) {
+    if (!enemy.boss) return 1;
+    const total = enemy.parts?.length || 0;
+    const destroyed = total - aliveBossParts(enemy).length;
+    if ((total > 0 && destroyed === total) || enemy.hp <= enemy.maxHp * 0.3) return 3;
+    if ((total > 0 && destroyed >= Math.ceil(total / 2)) || enemy.hp <= enemy.maxHp * 0.64) return 2;
+    return 1;
+  }
+
+  function refreshBossStage(enemy) {
+    const next = bossStage(enemy);
+    if (next <= enemy.stage) return;
+    enemy.stage = next;
+    enemy.shoot = Math.min(enemy.shoot, 0.48);
+    state.enemyBullets.forEach((bullet, index) => { if (index % 3 === 0) bullet.dead = true; });
+    state.flash = Math.max(state.flash, 0.18);
+    state.shake = Math.max(state.shake, 7);
+    setAlert(`BOSS PHASE ${next} // ${next === 3 ? "CORE EXPOSED" : "ARMOR BREACH"}`, "danger", 1.45);
+    tone("phase");
   }
 
   function spawnEnemy(type, options = {}) {
     const def = enemyDefs[type];
     const difficulty = currentDifficulty();
-    const overdriveScale = Math.pow(2.7, currentCycle());
-    const hpScale = (def.boss ? 0.72 + difficulty * 0.38 : 0.72 + difficulty * 0.32) * overdriveScale;
+    const cycleScale = Math.pow(1.68, currentCycle());
+    const eliteScale = options.elite ? 1.55 : 1;
+    const hpScale = (def.boss ? 0.72 + difficulty * 0.38 : 0.72 + difficulty * 0.32) * cycleScale * eliteScale;
     const x = options.x ?? (def.boss ? W / 2 : random(48, W - 48));
+    const mission = state.mission;
+    const missionTarget = Boolean(!def.boss
+      && mission
+      && !mission.resolved
+      && mission.targetType === type
+      && mission.assigned < mission.target);
+    if (missionTarget) mission.assigned += 1;
     const enemy = {
       type,
       x,
@@ -477,10 +840,13 @@
       r: def.r,
       hp: Math.round(def.hp * hpScale),
       maxHp: Math.round(def.hp * hpScale),
-      speed: def.speed * (1 + Math.min(0.22, (state.level - 1) * 0.035)),
-      score: Math.round(def.score * (1 + currentCycle() * 0.75)),
+      speed: def.speed * (1 + Math.min(0.25, (state.level - 1) * 0.035)) * (options.elite ? 1.08 : 1) * (missionTarget && mission.type === "pursuit" ? 1.13 : 1),
+      score: Math.round(def.score * (1 + currentCycle() * 0.75) * (options.elite ? 1.8 : 1)),
       color: def.color,
       boss: Boolean(def.boss),
+      elite: Boolean(options.elite),
+      missionTarget,
+      secret: Boolean(options.secret),
       bossTitle: def.bossTitle || "",
       phase: options.phase ?? random(0, TAU),
       age: 0,
@@ -489,22 +855,36 @@
       turn: random(-1, 1),
       drift: random(30, 75),
       targetY: def.boss ? 148 + (def.r - 65) * 0.45 : null,
+      parts: def.boss ? makeBossParts(type, hpScale) : [],
+      stage: 1,
       dead: false,
       damaged: 0,
     };
     state.enemies.push(enemy);
+    return enemy;
   }
 
   function spawnPickup(x, y, kind, weapon) {
     const roll = Math.random();
-    const actualKind = kind || (roll < 0.55 ? "weapon" : roll < 0.74 ? "upgrade" : roll < 0.88 ? "bomb" : "repair");
+    const actualKind = kind || (roll < 0.55 ? "armory" : roll < 0.74 ? "upgrade" : roll < 0.88 ? "bomb" : "repair");
     let selectedWeapon = weapon;
     if (!selectedWeapon) {
       const alternatives = state.player ? weaponKeys.filter((key) => key !== state.player.weapon) : weaponKeys;
       selectedWeapon = state.player && Math.random() < 0.34 ? state.player.weapon : choose(alternatives.length ? alternatives : weaponKeys);
     }
     state.pickups.push({
-      x, y, kind: actualKind, weapon: selectedWeapon, r: 18, life: 12, spin: random(0, TAU), vy: random(50, 74), dead: false,
+      x,
+      y,
+      kind: actualKind,
+      weapon: selectedWeapon,
+      weaponIndex: Math.max(0, weaponKeys.indexOf(selectedWeapon)),
+      r: actualKind === "armory" ? 22 : 18,
+      life: actualKind === "armory" ? 15 : 12,
+      spin: random(0, TAU),
+      vy: actualKind === "armory" ? random(36, 48) : random(50, 74),
+      hitPulse: 0,
+      cycleCharge: 0,
+      dead: false,
     });
   }
 
@@ -513,16 +893,18 @@
     const def = enemyDefs[enemy.type];
     const bulletCap = Math.min(92, 24 + state.level * 12);
     if (state.enemyBullets.length >= bulletCap) return;
-    const target = state.player;
+    const escortTarget = state.mission?.type === "escort" && !state.mission.resolved && state.ally && !state.ally.dead && Math.random() < 0.28;
+    const target = escortTarget ? state.ally : state.player;
     const aimedAngle = Math.atan2(target.y - enemy.y, target.x - enemy.x);
     const damageScale = 1 + Math.min(0.32, (state.level - 1) * 0.045);
+    const projectileScale = 1 + currentCycle() * 0.07 + Math.max(0, state.routeModifier.pressure || 0) * 0.18;
     const create = (angle, speed, damage, options = {}) => {
       if (state.enemyBullets.length >= bulletCap) return;
       state.enemyBullets.push({
         x: options.x ?? enemy.x,
         y: options.y ?? enemy.y + enemy.r * 0.4,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+        vx: Math.cos(angle) * speed * projectileScale,
+        vy: Math.sin(angle) * speed * projectileScale,
         r: options.r || 5,
         damage: damage * damageScale,
         color: options.color || def.color,
@@ -556,23 +938,42 @@
     if (def.attack === "radial") radial(7, 172, 10, enemy.age * 0.7, { r: 5, style: "orb" });
     if (def.attack === "carrier") {
       [-0.48, -0.24, 0, 0.24, 0.48].forEach((offset) => aimed(offset, 182, 13, { r: 6, color: "#ffd665" }));
-      create(Math.PI / 2 + 0.3, 225, 14, { x: enemy.x - 48, y: enemy.y + 40, r: 7, color: "#ff8c6d", style: "shell" });
-      create(Math.PI / 2 - 0.3, 225, 14, { x: enemy.x + 48, y: enemy.y + 40, r: 7, color: "#ff8c6d", style: "shell" });
+      aliveBossParts(enemy, "gun").forEach((part) => {
+        const origin = bossPartPosition(enemy, part);
+        const side = origin.x < enemy.x ? 0.3 : -0.3;
+        create(Math.PI / 2 + side, 225, 14, { x: origin.x, y: origin.y + 18, r: 7, color: "#ff8c6d", style: "shell" });
+      });
     }
     if (def.attack === "tempest") {
-      if (enemy.attackStep % 2 === 0) radial(10, 160, 10, enemy.age * 0.82, { r: 4, color: "#91e4ff", style: "spark", curve: 0.12 });
+      if (enemy.attackStep % 2 === 0) radial(6 + aliveBossParts(enemy, "gun").length * 2, 160, 10, enemy.age * 0.82, { r: 4, color: "#91e4ff", style: "spark", curve: 0.12 });
       else [-0.42, -0.21, 0, 0.21, 0.42].forEach((offset) => aimed(offset, 238, 12, { r: 5, color: "#e7fbff", style: "bolt" }));
     }
     if (def.attack === "dreadnought") {
       if (enemy.attackStep % 2 === 0) {
-        [-54, 0, 54].forEach((lane) => create(Math.PI / 2, 214, 15, { x: enemy.x + lane, y: enemy.y + 45, r: 8, color: "#ff9a5f", style: "shell" }));
+        const guns = aliveBossParts(enemy, "gun");
+        (guns.length ? guns : [{ x: 0, y: 20 }]).forEach((part) => {
+          const origin = part.id ? bossPartPosition(enemy, part) : { x: enemy.x, y: enemy.y + 20 };
+          create(Math.PI / 2, 214, 15, { x: origin.x, y: origin.y + 22, r: 8, color: "#ff9a5f", style: "shell" });
+        });
       } else {
         [-0.54, -0.36, -0.18, 0, 0.18, 0.36, 0.54].forEach((offset) => aimed(offset, 174, 13, { r: 6, color: "#ffcb73", style: "shard" }));
       }
     }
     if (def.attack === "core") {
-      radial(12, 158 + (enemy.attackStep % 3) * 18, 11, enemy.age * 1.1, { r: 6, color: enemy.attackStep % 2 ? "#9af0de" : "#d6a8ff", style: "orb", curve: enemy.attackStep % 2 ? 0.14 : -0.14 });
+      radial(6 + aliveBossParts(enemy, "node").length * 2, 158 + (enemy.attackStep % 3) * 18, 11, enemy.age * 1.1, { r: 6, color: enemy.attackStep % 2 ? "#9af0de" : "#d6a8ff", style: "orb", curve: enemy.attackStep % 2 ? 0.14 : -0.14 });
       [-0.18, 0, 0.18].forEach((offset) => aimed(offset, 252, 13, { r: 4, color: "#f1e8ff", style: "bolt" }));
+    }
+    if (def.attack === "seraph") {
+      const spin = enemy.attackStep % 2 ? 0.16 : -0.16;
+      radial(14, 168 + enemy.stage * 13, 12, enemy.age * 1.35, { r: 6, color: enemy.attackStep % 2 ? "#f0dcff" : "#8ff5df", style: "orb", curve: spin });
+      [-0.3, -0.15, 0, 0.15, 0.3].forEach((offset) => aimed(offset, 275, 14, { r: 4, color: "#ffffff", style: "spark" }));
+    }
+    if (enemy.boss && enemy.stage >= 2) {
+      if (enemy.attackStep % 2 === 0) [-0.27, 0, 0.27].forEach((offset) => aimed(offset, 248, 12, { r: 5, color: currentTheme().accent, style: "shard" }));
+      else radial(6 + enemy.stage * 2, 148 + enemy.stage * 12, 10, -enemy.age * 0.78, { r: 5, color: currentTheme().line, style: "orb", curve: -0.08 });
+    }
+    if (enemy.boss && enemy.stage >= 3) {
+      [-64, 64].forEach((lane) => create(Math.PI / 2, 235, 14, { x: enemy.x + lane, y: enemy.y + 28, r: 6, color: "#fff2bd", style: "bolt" }));
     }
     if (currentCycle() > 0) {
       if (enemy.boss) {
@@ -591,7 +992,14 @@
     const def = weaponDefs[player.weapon];
     const level = player.weaponLevel;
     const add = (x, y, vx, vy, opts = {}) => {
-      state.bullets.push({ x, y, vx, vy, r: 4, damage: 12, color: def.color, life: 2.2, pierce: 1, hits: 0, type: player.weapon, dead: false, ...opts });
+      const bullet = { x, y, vx, vy, r: 4, damage: 12, color: def.color, life: 2.2, pierce: 1, hits: 0, type: player.weapon, dead: false, ...opts };
+      if (state.overdrive > 0) {
+        bullet.damage *= 1.28;
+        bullet.vx *= 1.08;
+        bullet.vy *= 1.08;
+        bullet.overdrive = true;
+      }
+      state.bullets.push(bullet);
     };
     if (player.weapon === "vulcan") {
       add(player.x - 12, player.y - 20, -18, -590, { damage: 11 + level * 4, r: 4 });
@@ -635,7 +1043,7 @@
 
   function triggerSpecial() {
     const player = state.player;
-    if (!state.running || state.paused || !player || player.bombs <= 0 || player.specialCooldown > 0) return;
+    if (!state.running || state.paused || state.routeOpen || !player || player.bombs <= 0 || player.specialCooldown > 0) return;
     player.bombs -= 1;
     player.specialCooldown = 1.5;
     state.rings.push({ x: player.x, y: player.y, r: 8, max: 700, life: 0.9, maxLife: 0.9, color: "#ffd665", damage: 145, hits: new Set(), special: true });
@@ -645,6 +1053,150 @@
     setAlert("ION BURST", "bright", 1.25);
     tone("special");
     syncUi();
+  }
+
+  function damageAlly(amount) {
+    const ally = state.ally;
+    if (!ally || ally.dead || ally.invulnerable > 0) return;
+    ally.hp -= amount * 0.62;
+    ally.damaged = 0.18;
+    ally.invulnerable = 0.12;
+    state.mission.progress = Math.max(0, Math.round(ally.hp / ally.maxHp * 100));
+    burst(ally.x, ally.y, "#7de9ff", 8, 105, 0.35);
+    if (ally.hp <= 0) {
+      ally.hp = 0;
+      ally.dead = true;
+      burst(ally.x, ally.y, "#ff806a", 38, 245, 0.9);
+      resolveMission(false, "AEGIS-7 DESTROYED");
+    }
+  }
+
+  function updateMission(dt) {
+    const mission = state.mission;
+    if (!mission) return;
+    if (state.ally && !state.ally.dead) {
+      const ally = state.ally;
+      ally.age += dt;
+      ally.damaged = Math.max(0, ally.damaged - dt);
+      ally.invulnerable = Math.max(0, (ally.invulnerable || 0) - dt);
+      ally.x = W / 2 + Math.sin(ally.age * 0.62) * 132;
+      ally.y = ally.baseY + Math.sin(ally.age * 1.3) * 10;
+      mission.progress = Math.max(0, Math.round(ally.hp / ally.maxHp * 100));
+    }
+    if (!mission.resolved && mission.type === "escape" && state.levelPhase === "waves") {
+      mission.progress = Math.min(mission.target, mission.progress + dt);
+      if (mission.progress >= mission.target) resolveMission(true);
+    }
+  }
+
+  function applyLightningStrike(hazard) {
+    if (state.player && Math.abs(state.player.x - hazard.x) < 28) damagePlayer(19);
+    else if (state.player && Math.abs(state.player.x - hazard.x) < 76) addOverdrive(10);
+    for (const enemy of state.enemies) {
+      if (!enemy.dead && Math.abs(enemy.x - hazard.x) < 36) damageEnemy(enemy, enemy.boss ? 42 : 78, true);
+    }
+    if (state.ally && !state.ally.dead && Math.abs(state.ally.x - hazard.x) < 30) damageAlly(17);
+    state.shake = Math.max(state.shake, 6);
+    state.flash = Math.max(state.flash, 0.12);
+    burst(hazard.x, H * 0.45, "#dff8ff", 24, 180, 0.45);
+    tone("lightning");
+  }
+
+  function applyHeatVent(hazard) {
+    const laneWidth = W / 3;
+    const playerLane = clamp(Math.floor(state.player.x / laneWidth), 0, 2);
+    if (playerLane !== hazard.safeLane) damagePlayer(16);
+    for (const enemy of state.enemies) {
+      const lane = clamp(Math.floor(enemy.x / laneWidth), 0, 2);
+      if (!enemy.dead && lane !== hazard.safeLane) damageEnemy(enemy, enemy.boss ? 34 : 58, true);
+    }
+    if (state.ally && !state.ally.dead) {
+      const allyLane = clamp(Math.floor(state.ally.x / laneWidth), 0, 2);
+      if (allyLane !== hazard.safeLane) damageAlly(14);
+    }
+    state.shake = Math.max(state.shake, 5);
+    tone("heat");
+  }
+
+  function updateEnvironment(dt) {
+    const environment = state.environment;
+    if (!environment || state.levelPhase === "clear" || state.levelPhase === "route" || state.levelPhase === "secret-warning") return;
+    environment.timer -= dt;
+    environment.pulse += dt;
+    const pressure = Math.max(0, state.routeModifier.pressure || 0);
+    if (environment.timer <= 0) {
+      if (environment.type === "slipstream") {
+        state.hazards.push({ kind: "slipstream", x: random(65, W - 65), y: -45, r: 34, life: 9, spin: random(0, TAU), dead: false });
+        environment.timer = Math.max(3.6, 5.3 - currentCycle() * 0.25 - pressure);
+      } else if (environment.type === "lightning") {
+        state.hazards.push({ kind: "lightning", x: random(54, W - 54), warning: 1.15, active: 0.25, fired: false, dead: false });
+        environment.timer = Math.max(3, 5.2 - currentCycle() * 0.3 - pressure * 2);
+      } else if (environment.type === "heat") {
+        state.hazards.push({ kind: "heat", safeLane: Math.floor(random(0, 3)), warning: 1.3, active: 0.72, fired: false, dead: false });
+        environment.timer = Math.max(3.1, 5.5 - currentCycle() * 0.3 - pressure * 2);
+      } else if (environment.type === "gravity") {
+        state.hazards.push({ kind: "gravity", x: random(90, W - 90), y: random(260, 585), r: 24, life: 4.7, maxLife: 4.7, captured: 0, dead: false });
+        environment.timer = Math.max(4.2, 6.8 - currentCycle() * 0.35 - pressure * 2);
+      }
+    }
+
+    for (const hazard of state.hazards) {
+      if (hazard.kind === "slipstream") {
+        hazard.life -= dt;
+        hazard.y += 116 * dt;
+        hazard.spin += dt * 1.9;
+        if (state.player && distance(hazard, state.player) < hazard.r + state.player.r && !hazard.collected) {
+          hazard.collected = true;
+          hazard.dead = true;
+          state.score += 320;
+          addOverdrive(17);
+          state.rings.push({ x: hazard.x, y: hazard.y, r: 8, max: 88, life: 0.42, maxLife: 0.42, color: "#69f7d0", damage: 0, hits: new Set() });
+          state.floating.push({ x: hazard.x, y: hazard.y, text: "SLIPSTREAM +17", color: "#69f7d0", life: 0.8, maxLife: 0.8 });
+          tone("graze", 0.035);
+        }
+        if (hazard.life <= 0 || hazard.y > H + 55) hazard.dead = true;
+      } else if (hazard.kind === "lightning" || hazard.kind === "heat") {
+        if (!hazard.fired) {
+          hazard.warning -= dt;
+          if (hazard.warning <= 0) {
+            hazard.fired = true;
+            if (hazard.kind === "lightning") applyLightningStrike(hazard); else applyHeatVent(hazard);
+          }
+        } else {
+          hazard.active -= dt;
+          if (hazard.active <= 0) hazard.dead = true;
+        }
+      } else if (hazard.kind === "gravity") {
+        hazard.life -= dt;
+        const bodies = [...state.bullets, ...state.enemyBullets, ...state.pickups];
+        for (const body of bodies) {
+          if (body.dead) continue;
+          const dx = hazard.x - body.x;
+          const dy = hazard.y - body.y;
+          const d = Math.hypot(dx, dy);
+          if (d <= 1 || d > 185) continue;
+          const force = (1 - d / 185) * (body.kind ? 48 : 90);
+          if (body.vx !== undefined) {
+            body.vx += dx / d * force * dt;
+            body.vy += dy / d * force * dt;
+          } else {
+            body.x += dx / d * force * dt;
+            body.y += dy / d * force * dt;
+          }
+          if (d < 20 && body.damage && state.enemyBullets.includes(body)) {
+            body.dead = true;
+            hazard.captured += 1;
+            addOverdrive(1.4);
+          }
+        }
+        if (hazard.life <= 0) {
+          hazard.dead = true;
+          state.rings.push({ x: hazard.x, y: hazard.y, r: 6, max: 95, life: 0.42, maxLife: 0.42, color: "#d4a7ff", damage: 24 + hazard.captured * 2, hits: new Set() });
+          burst(hazard.x, hazard.y, "#d4a7ff", 18, 150, 0.55);
+        }
+      }
+    }
+    state.hazards = state.hazards.filter((hazard) => !hazard.dead);
   }
 
   function updatePlayer(dt) {
@@ -672,8 +1224,11 @@
     player.engine += dt * 20;
     player.invulnerable = Math.max(0, player.invulnerable - dt);
     player.specialCooldown = Math.max(0, player.specialCooldown - dt);
+    state.moduleCooldown = Math.max(0, state.moduleCooldown - dt);
     player.fireCooldown -= dt;
-    const fireRate = weaponDefs[player.weapon].rate * (1 - (player.weaponLevel - 1) * 0.07);
+    const overdriveRate = state.overdrive > 0 ? 0.64 : 1;
+    const moduleRate = state.module === "arsenal" ? 0.88 : 1;
+    const fireRate = weaponDefs[player.weapon].rate * (1 - (player.weaponLevel - 1) * 0.07) * overdriveRate * moduleRate;
     while (player.fireCooldown <= 0) {
       fireWeapon();
       player.fireCooldown += fireRate;
@@ -685,11 +1240,13 @@
       const def = enemyDefs[enemy.type];
       enemy.age += dt;
       enemy.damaged = Math.max(0, enemy.damaged - dt);
+      enemy.parts?.forEach((part) => { part.damaged = Math.max(0, part.damaged - dt); });
       if (enemy.boss) {
+        refreshBossStage(enemy);
         if (enemy.y < enemy.targetY) enemy.y = Math.min(enemy.targetY, enemy.y + enemy.speed * dt);
         else enemy.y += (enemy.targetY - enemy.y + Math.sin(enemy.age * 1.4) * 5) * Math.min(1, dt * 3.2);
-        const bossDrift = def.motion === "carrier" ? 85 : def.motion === "tempest" ? 122 : def.motion === "dreadnought" ? 70 : 96;
-        const bossTempo = def.motion === "dreadnought" ? 0.38 : def.motion === "core" ? 0.84 : def.motion === "tempest" ? 0.68 : 0.5;
+        const bossDrift = def.motion === "carrier" ? 85 : def.motion === "tempest" ? 122 : def.motion === "dreadnought" ? 70 : def.motion === "seraph" ? 138 : 96;
+        const bossTempo = def.motion === "dreadnought" ? 0.38 : def.motion === "core" ? 0.84 : def.motion === "tempest" ? 0.68 : def.motion === "seraph" ? 0.95 : 0.5;
         enemy.x = W / 2 + Math.sin(enemy.age * bossTempo + enemy.phase) * bossDrift;
       } else {
         if (def.motion === "weave") enemy.x = enemy.baseX + Math.sin(enemy.age * 2.1 + enemy.phase) * 64;
@@ -707,15 +1264,58 @@
       if (enemy.shoot <= 0 && enemy.y > 40 && enemy.y < H - 110) {
         fireEnemy(enemy);
         const pressure = clamp(1.08 - (state.level - 1) * 0.035, 0.76, 1.08);
-        enemy.shoot += def.cadence * pressure * random(0.9, 1.12);
+        const stageRate = enemy.boss ? 1 - (enemy.stage - 1) * 0.12 : 1;
+        const destroyedGuns = enemy.boss ? (enemy.parts || []).filter((part) => part.role === "gun" && part.dead).length : 0;
+        enemy.shoot += def.cadence * pressure * stageRate * (1 + destroyedGuns * 0.1) * random(0.9, 1.12);
       }
-      if (!enemy.boss && (enemy.y > H + 115 || enemy.x < -120 || enemy.x > W + 120)) enemy.dead = true;
+      if (!enemy.boss && (enemy.y > H + 115 || enemy.x < -120 || enemy.x > W + 120)) {
+        enemy.dead = true;
+        if (enemy.missionTarget && state.mission && !state.mission.resolved) {
+          state.mission.missed += 1;
+          state.floating.push({ x: clamp(enemy.x, 30, W - 30), y: H - 60, text: "TARGET ESCAPED", color: "#ff806a", life: 1, maxLife: 1 });
+          resolveMission(false, "TARGET ESCAPED");
+        }
+      }
+      if (state.ally && !state.ally.dead && !enemy.dead && distance(enemy, state.ally) < enemy.r + state.ally.r - 4) {
+        damageAlly(enemy.boss ? 36 : 24);
+        if (!enemy.boss) damageEnemy(enemy, enemy.hp + 1, true);
+      }
       if (state.player && !enemy.dead && distance(enemy, state.player) < enemy.r + state.player.r - 4) {
         damagePlayer(enemy.boss ? 42 : 27);
         if (!enemy.boss) damageEnemy(enemy, enemy.hp + 1, true);
         else state.player.y = clamp(state.player.y + 34, 120, H - 36);
       }
     }
+  }
+
+  function damageBossPart(enemy, part, amount, heavy = false) {
+    if (part.dead || enemy.dead || !state.running) return;
+    part.hp -= amount;
+    part.damaged = 0.12;
+    const position = bossPartPosition(enemy, part);
+    burst(position.x, position.y, enemy.color, heavy ? 10 : 4, heavy ? 160 : 76, 0.32);
+    if (part.hp > 0) return;
+    part.dead = true;
+    part.hp = 0;
+    state.bossPartsDestroyed += 1;
+    const reward = Math.round((720 + currentCycle() * 380) * (state.routeModifier.score || 1));
+    state.score += reward;
+    addOverdrive(18);
+    state.shake = Math.max(state.shake, 8);
+    state.rings.push({ x: position.x, y: position.y, r: 5, max: 92, life: 0.42, maxLife: 0.42, color: enemy.color, damage: 0, hits: new Set() });
+    state.floating.push({ x: position.x, y: position.y - 18, text: `${part.label} BREAK +${reward}`, color: "#ffd665", life: 1.1, maxLife: 1.1 });
+    refreshBossStage(enemy);
+    tone("part");
+  }
+
+  function hitArmoryCore(bullet, pickup) {
+    bullet.armoryHits ||= new Set();
+    if (bullet.armoryHits.has(pickup) || distance(bullet, pickup) >= bullet.r + pickup.r) return false;
+    bullet.armoryHits.add(pickup);
+    pickup.hitPulse = 0.2;
+    pickup.cycleCharge = Math.min(1.25, pickup.cycleCharge + Math.min(0.18, bullet.damage / 180));
+    burst(bullet.x, bullet.y, weaponDefs[pickup.weapon].color, 3, 58, 0.16);
+    return true;
   }
 
   function updateBullets(dt) {
@@ -743,8 +1343,28 @@
       bullet.y += bullet.vy * dt;
       if (bullet.life <= 0 || bullet.y < -100 || bullet.x < -100 || bullet.x > W + 100) bullet.dead = true;
       if (bullet.dead) continue;
+      for (const pickup of state.pickups) {
+        if (!pickup.dead && pickup.kind === "armory") hitArmoryCore(bullet, pickup);
+      }
       for (const enemy of state.enemies) {
-        if (enemy.dead || bullet.dead || bullet.hitIds?.has(enemy)) continue;
+        if (enemy.dead || bullet.dead) continue;
+        if (enemy.boss) {
+          const part = aliveBossParts(enemy).find((candidate) => {
+            const position = bossPartPosition(enemy, candidate);
+            return distance(bullet, position) < bullet.r + candidate.r;
+          });
+          if (part) {
+            bullet.hitIds ||= new Set();
+            if (bullet.hitIds.has(part)) continue;
+            bullet.hitIds.add(part);
+            damageBossPart(enemy, part, bullet.damage);
+            bullet.hits += 1;
+            if (bullet.plasma) { explodePlasma(bullet); bullet.dead = true; }
+            else if (bullet.hits >= bullet.pierce) bullet.dead = true;
+            continue;
+          }
+        }
+        if (bullet.hitIds?.has(enemy)) continue;
         if (distance(bullet, enemy) < bullet.r + enemy.r) {
           bullet.hitIds ||= new Set();
           bullet.hitIds.add(enemy);
@@ -768,9 +1388,18 @@
       bullet.x += bullet.vx * dt;
       bullet.y += bullet.vy * dt;
       if (bullet.life <= 0 || bullet.y > H + 60 || bullet.x < -60 || bullet.x > W + 60) bullet.dead = true;
-      if (!bullet.dead && state.player && distance(bullet, state.player) < bullet.r + state.player.r - 3) {
+      if (!bullet.dead && state.player) {
+        const playerDistance = distance(bullet, state.player);
+        if (playerDistance < bullet.r + state.player.r - 3) {
+          bullet.dead = true;
+          damagePlayer(bullet.damage);
+        } else if (playerDistance < bullet.r + state.player.r + 22 && state.player.invulnerable <= 0) {
+          registerGraze(bullet);
+        }
+      }
+      if (!bullet.dead && state.ally && !state.ally.dead && distance(bullet, state.ally) < bullet.r + state.ally.r - 2) {
         bullet.dead = true;
-        damagePlayer(bullet.damage);
+        damageAlly(bullet.damage * 0.82);
       }
     }
   }
@@ -780,8 +1409,23 @@
       ring.life -= dt;
       const progress = 1 - ring.life / ring.maxLife;
       ring.r = ring.max * (1 - (1 - progress) * (1 - progress));
+      if (ring.damage <= 0) {
+        if (ring.life <= 0) ring.dead = true;
+        continue;
+      }
       for (const enemy of state.enemies) {
-        if (enemy.dead || ring.hits.has(enemy)) continue;
+        if (enemy.dead) continue;
+        if (enemy.boss) {
+          for (const part of aliveBossParts(enemy)) {
+            if (ring.hits.has(part)) continue;
+            const position = bossPartPosition(enemy, part);
+            if (distance(ring, position) < ring.r + part.r) {
+              ring.hits.add(part);
+              damageBossPart(enemy, part, ring.damage * 0.72, ring.special);
+            }
+          }
+        }
+        if (ring.hits.has(enemy)) continue;
         if (distance(ring, enemy) < ring.r + enemy.r) {
           ring.hits.add(enemy);
           damageEnemy(enemy, ring.damage, ring.special);
@@ -797,6 +1441,26 @@
       pickup.spin += dt * 3.7;
       pickup.y += pickup.vy * dt;
       pickup.x += Math.sin(pickup.spin * 1.8) * 24 * dt;
+      pickup.hitPulse = Math.max(0, (pickup.hitPulse || 0) - dt);
+      if (pickup.kind === "armory") {
+        const threshold = state.module === "magnet" ? 0.76 : 1;
+        if (pickup.hitPulse <= 0) pickup.cycleCharge = Math.max(0, pickup.cycleCharge - dt * 0.5);
+        if (pickup.cycleCharge >= threshold) {
+          pickup.cycleCharge = 0;
+          pickup.weaponIndex = (pickup.weaponIndex + 1) % weaponKeys.length;
+          pickup.weapon = weaponKeys[pickup.weaponIndex];
+          state.rings.push({ x: pickup.x, y: pickup.y, r: 4, max: 45, life: 0.24, maxLife: 0.24, color: weaponDefs[pickup.weapon].color, damage: 0, hits: new Set() });
+          tone("armory", 0.028);
+        }
+      }
+      if (state.module === "magnet" && state.player) {
+        const d = distance(pickup, state.player);
+        if (d < 190 && d > 1) {
+          const pull = (1 - d / 190) * 245 * dt;
+          pickup.x += (state.player.x - pickup.x) / d * pull;
+          pickup.y += (state.player.y - pickup.y) / d * pull;
+        }
+      }
       if (pickup.life <= 0 || pickup.y > H + 35) pickup.dead = true;
       if (!pickup.dead && state.player && distance(pickup, state.player) < pickup.r + state.player.r + 5) collectPickup(pickup);
     }
@@ -805,14 +1469,14 @@
   function collectPickup(pickup) {
     const player = state.player;
     pickup.dead = true;
-    if (pickup.kind === "weapon") {
+    if (pickup.kind === "weapon" || pickup.kind === "armory") {
       const isDuplicate = player.weapon === pickup.weapon;
       if (isDuplicate) player.weaponLevel = Math.min(3, player.weaponLevel + 1);
       else player.weapon = pickup.weapon;
       const def = weaponDefs[player.weapon];
       const message = isDuplicate
         ? `${def.name} POWER // ${player.weaponLevel >= 3 ? "MAX" : roman(player.weaponLevel)}`
-        : `WEAPON SWITCH // ${def.name} ${roman(player.weaponLevel)}`;
+        : `${pickup.kind === "armory" ? "ARMORY LOCK" : "WEAPON SWITCH"} // ${def.name} ${roman(player.weaponLevel)}`;
       setAlert(message, "bright", 1.1);
       burst(pickup.x, pickup.y, def.color, 20, 130, 0.5);
       tone(isDuplicate ? "upgrade" : "pickup");
@@ -839,9 +1503,17 @@
 
   function damageEnemy(enemy, amount, heavy = false) {
     if (enemy.dead || !state.running) return;
+    if (enemy.boss && enemy.parts?.length) {
+      const alive = aliveBossParts(enemy).length;
+      const destroyedRatio = 1 - alive / enemy.parts.length;
+      const shieldAlive = aliveBossParts(enemy, "shield").length > 0;
+      const armorScale = alive === 0 ? 1.12 : (0.38 + destroyedRatio * 0.36) * (shieldAlive ? 0.72 : 1);
+      amount *= armorScale;
+    }
     enemy.hp -= amount;
     enemy.damaged = 0.1;
     burst(enemy.x, enemy.y, enemy.color, heavy ? 8 : 3, heavy ? 145 : 62, 0.28);
+    if (enemy.boss) refreshBossStage(enemy);
     if (enemy.hp <= 0) destroyEnemy(enemy);
   }
 
@@ -852,18 +1524,23 @@
     state.combo = Math.min(9, state.combo + 1);
     state.comboTimer = 2.5;
     const bonus = state.combo >= 5 ? 1.5 : state.combo >= 3 ? 1.25 : 1;
-    const earned = Math.round(enemy.score * bonus);
+    const earned = Math.round(enemy.score * bonus * (state.routeModifier.score || 1) * (state.overdrive > 0 ? 1.4 : 1));
     state.score += earned;
     state.shake = Math.max(state.shake, enemy.boss ? 13 : 3);
     burst(enemy.x, enemy.y, enemy.color, enemy.boss ? 78 : 30, enemy.boss ? 365 : 235, enemy.boss ? 1.25 : 0.65);
     state.rings.push({ x: enemy.x, y: enemy.y, r: 2, max: enemy.boss ? 190 : 62, life: 0.38, maxLife: 0.38, color: enemy.color, damage: 0, hits: new Set() });
     state.floating.push({ x: enemy.x, y: enemy.y - enemy.r, text: `+${earned}`, color: enemy.color, life: 0.78, maxLife: 0.78 });
+    if (enemy.missionTarget && state.mission && !state.mission.resolved) {
+      state.mission.progress = Math.min(state.mission.target, state.mission.progress + 1);
+      state.floating.push({ x: enemy.x, y: enemy.y - enemy.r - 22, text: `OBJECTIVE ${Math.floor(state.mission.progress)}/${state.mission.target}`, color: "#ffd665", life: 0.95, maxLife: 0.95 });
+      if (state.mission.progress >= state.mission.target) resolveMission(true);
+    }
     state.weaponKillCounter += enemy.boss ? 5 : 1;
     state.upgradeKillCounter += enemy.boss ? 5 : 1;
     let droppedWeapon = false;
     let droppedUpgrade = false;
     if (state.weaponKillCounter >= state.nextWeaponDrop) {
-      spawnPickup(enemy.x, enemy.y, "weapon");
+      spawnPickup(enemy.x, enemy.y, "armory");
       state.weaponKillCounter = 0;
       state.nextWeaponDrop = Math.floor(random(17, 24));
       droppedWeapon = true;
@@ -890,6 +1567,17 @@
   function damagePlayer(amount) {
     const player = state.player;
     if (!player || player.invulnerable > 0 || !state.running) return;
+    if (state.module === "aegis" && player.moduleCharges > 0) {
+      player.moduleCharges -= 1;
+      player.invulnerable = 0.92;
+      state.shake = Math.max(state.shake, 4);
+      state.rings.push({ x: player.x, y: player.y, r: 10, max: 78, life: 0.42, maxLife: 0.42, color: moduleDefs.aegis.color, damage: 0, hits: new Set() });
+      setAlert("AEGIS SHELL // IMPACT ABSORBED", "bright", 1.05);
+      tone("shield");
+      navigator.vibrate?.(15);
+      syncUi();
+      return;
+    }
     player.hp -= amount;
     player.invulnerable = 0.78;
     state.shake = 9;
@@ -961,10 +1649,31 @@
   function updateGame(dt) {
     updateBackdrop(dt);
     if (!state.running || state.paused) return;
+    if (state.routeOpen) {
+      updateParticles(dt);
+      state.particles = state.particles.filter((item) => !item.dead);
+      state.floating = state.floating.filter((item) => !item.dead);
+      state.shake = Math.max(0, state.shake - dt * 24);
+      state.flash = Math.max(0, state.flash - dt * 2.2);
+      syncUi();
+      return;
+    }
     state.elapsed += dt;
     state.comboTimer -= dt;
     if (state.comboTimer <= 0) state.combo = 1;
+    if (state.overdrive > 0) {
+      state.overdrive = Math.max(0, state.overdrive - dt);
+      state.overdriveCharge = state.overdriveMax > 0 ? state.overdrive / state.overdriveMax * 100 : 0;
+      if (state.overdrive <= 0) {
+        state.overdriveCharge = 0;
+        state.overdriveMax = 0;
+        state.floating.push({ x: state.player.x, y: state.player.y - 34, text: "OVERDRIVE COOLED", color: "#a8cabc", life: 0.7, maxLife: 0.7 });
+      }
+    }
+    updateMission(dt);
     updateLevelFlow(dt);
+    if (state.routeOpen) return;
+    updateEnvironment(dt);
     updatePlayer(dt);
     updateEnemies(dt);
     updateBullets(dt);
@@ -1159,6 +1868,117 @@
     if (level.theme === "rift") drawRiftScene();
   }
 
+  function drawEnvironment() {
+    for (const hazard of state.hazards) {
+      ctx.save();
+      if (hazard.kind === "slipstream") {
+        ctx.translate(hazard.x, hazard.y);
+        ctx.rotate(hazard.spin);
+        ctx.strokeStyle = "rgba(105, 247, 208, 0.74)";
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = "#69f7d0";
+        ctx.setLineDash([12, 8]);
+        ctx.beginPath(); ctx.arc(0, 0, hazard.r, 0, TAU); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 0.42;
+        ctx.beginPath(); ctx.arc(0, 0, hazard.r - 9, 0, TAU); ctx.stroke();
+        ctx.fillStyle = "#dfffee";
+        ctx.globalAlpha = 0.8;
+        [-1, 1].forEach((side) => {
+          ctx.beginPath(); ctx.moveTo(side * 9, -7); ctx.lineTo(0, 0); ctx.lineTo(side * 9, 7); ctx.lineTo(side * 4, 0); ctx.closePath(); ctx.fill();
+        });
+      } else if (hazard.kind === "lightning") {
+        const warningAlpha = hazard.fired ? 0.85 : 0.24 + Math.sin(hazard.warning * 18) * 0.16;
+        ctx.globalAlpha = warningAlpha;
+        ctx.strokeStyle = hazard.fired ? "#f1feff" : "#8de7ff";
+        ctx.lineWidth = hazard.fired ? 12 : 2;
+        ctx.shadowBlur = hazard.fired ? 30 : 8;
+        ctx.shadowColor = "#8de7ff";
+        ctx.setLineDash(hazard.fired ? [] : [10, 12]);
+        ctx.beginPath(); ctx.moveTo(hazard.x, 0); ctx.lineTo(hazard.x, H); ctx.stroke();
+        if (!hazard.fired) {
+          ctx.fillStyle = "#dff8ff";
+          ctx.font = "900 9px 'Avenir Next Condensed', sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("STRIKE VECTOR", hazard.x, 142);
+        }
+      } else if (hazard.kind === "heat") {
+        const laneWidth = W / 3;
+        for (let lane = 0; lane < 3; lane += 1) {
+          if (lane === hazard.safeLane) {
+            ctx.globalAlpha = 0.35;
+            ctx.strokeStyle = "#69f7d0";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(lane * laneWidth + 7, 0, laneWidth - 14, H);
+          } else {
+            const alpha = hazard.fired ? 0.34 : 0.11 + Math.sin(hazard.warning * 16) * 0.045;
+            const gradient = ctx.createLinearGradient(0, H, 0, 80);
+            gradient.addColorStop(0, `rgba(255, 105, 69, ${alpha * 1.9})`);
+            gradient.addColorStop(1, `rgba(255, 170, 86, ${alpha * 0.2})`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(lane * laneWidth, 0, laneWidth, H);
+            ctx.globalAlpha = 0.68;
+            ctx.fillStyle = "#ffb176";
+            ctx.font = "900 8px 'Avenir Next Condensed', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("VENT", (lane + 0.5) * laneWidth, H - 92);
+          }
+        }
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = "#ffe1aa";
+        ctx.font = "900 9px 'Avenir Next Condensed', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("SAFE", (hazard.safeLane + 0.5) * laneWidth, H - 92);
+      } else if (hazard.kind === "gravity") {
+        const progress = Math.max(0, hazard.life / hazard.maxLife);
+        ctx.translate(hazard.x, hazard.y);
+        ctx.rotate(state.backdropTime * 1.4);
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = "#d4a7ff";
+        for (let ring = 0; ring < 4; ring += 1) {
+          ctx.globalAlpha = (0.52 - ring * 0.09) * Math.min(1, progress * 3);
+          ctx.strokeStyle = ring % 2 ? "#8ff3dc" : "#d4a7ff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, 18 + ring * 11 + Math.sin(state.backdropTime * 4 + ring) * 3, ring * 0.6, Math.PI + ring * 0.8);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = "#080714";
+        ctx.beginPath(); ctx.arc(0, 0, 11 + hazard.captured * 0.45, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawAlly() {
+    const ally = state.ally;
+    if (!ally || ally.dead) return;
+    ctx.save();
+    ctx.translate(ally.x, ally.y);
+    ctx.fillStyle = ally.damaged > 0 ? "#ffffff" : "#7de9ff";
+    ctx.globalAlpha = 0.86;
+    ctx.beginPath();
+    ctx.moveTo(0, -30); ctx.lineTo(13, -9); ctx.lineTo(34, 2); ctx.lineTo(18, 14); ctx.lineTo(8, 10); ctx.lineTo(0, 28); ctx.lineTo(-8, 10); ctx.lineTo(-18, 14); ctx.lineTo(-34, 2); ctx.lineTo(-13, -9); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#dcffff";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = "#173b4b";
+    ctx.fillRect(-6, -16, 12, 31);
+    ctx.restore();
+    const width = 74;
+    ctx.fillStyle = "rgba(3, 12, 14, 0.78)";
+    ctx.fillRect(ally.x - width / 2, ally.y + 37, width, 4);
+    ctx.fillStyle = ally.hp > 35 ? "#7de9ff" : "#ff806a";
+    ctx.fillRect(ally.x - width / 2, ally.y + 37, width * ally.hp / ally.maxHp, 4);
+    ctx.fillStyle = "#dff8ff";
+    ctx.font = "900 8px 'Avenir Next Condensed', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("AEGIS-7", ally.x, ally.y + 52);
+  }
+
   function shipPath(scale = 1) {
     ctx.beginPath();
     ctx.moveTo(0, -31 * scale);
@@ -1181,6 +2001,28 @@
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(p.tilt);
+    if (state.overdrive > 0) {
+      ctx.save();
+      ctx.rotate(-p.tilt + state.backdropTime * 2.2);
+      ctx.strokeStyle = "rgba(255, 214, 101, 0.72)";
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 16;
+      ctx.shadowColor = "#ffd665";
+      ctx.setLineDash([8, 7]);
+      ctx.beginPath(); ctx.arc(0, 0, 34 + Math.sin(p.engine * 0.35) * 3, 0, TAU); ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.strokeStyle = "rgba(105, 247, 208, 0.13)";
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(0, 0, p.r + 22, 0, TAU); ctx.stroke();
+    }
+    if (state.module === "aegis" && p.moduleCharges > 0) {
+      ctx.strokeStyle = "rgba(105, 247, 208, 0.58)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([13, 6]);
+      ctx.beginPath(); ctx.arc(0, 0, 39, -1.1, Math.PI + 1.1); ctx.stroke();
+      ctx.setLineDash([]);
+    }
     const flame = 24 + Math.sin(p.engine) * 7;
     ctx.fillStyle = "rgba(105, 247, 208, 0.25)";
     ctx.beginPath();
@@ -1209,6 +2051,26 @@
     ctx.save();
     ctx.translate(enemy.x, enemy.y);
     const tint = enemy.damaged > 0 ? "#fff7dc" : enemy.color;
+    if (enemy.elite) {
+      ctx.save();
+      ctx.rotate(-enemy.age * 0.9);
+      ctx.strokeStyle = "rgba(255, 214, 101, 0.64)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.arc(0, 0, enemy.r + 8, 0, TAU); ctx.stroke();
+      ctx.restore();
+    }
+    if (enemy.missionTarget) {
+      ctx.save();
+      ctx.rotate(enemy.age * 1.3);
+      ctx.strokeStyle = "#ffd665";
+      ctx.lineWidth = 2;
+      for (let corner = 0; corner < 4; corner += 1) {
+        ctx.rotate(Math.PI / 2);
+        ctx.beginPath(); ctx.moveTo(enemy.r + 8, -7); ctx.lineTo(enemy.r + 8, 7); ctx.lineTo(enemy.r + 14, 7); ctx.stroke();
+      }
+      ctx.restore();
+    }
     if (enemy.type === "scout") {
       ctx.rotate(Math.sin(enemy.age * 4 + enemy.phase) * 0.18);
       ctx.fillStyle = tint;
@@ -1364,9 +2226,73 @@
       ctx.beginPath(); ctx.arc(0, 0, 24, 0, TAU); ctx.fill();
       ctx.fillStyle = enemy.damaged > 0 ? "#ffffff" : "#9af0de";
       ctx.beginPath(); ctx.arc(0, 0, 11 + Math.sin(enemy.age * 4) * 2, 0, TAU); ctx.fill();
+    } else if (enemy.type === "seraph") {
+      ctx.save();
+      ctx.rotate(enemy.age * 0.28);
+      ctx.strokeStyle = tint;
+      ctx.lineWidth = 7;
+      ctx.globalAlpha = 0.7;
+      for (let arc = 0; arc < 3; arc += 1) {
+        ctx.beginPath(); ctx.arc(0, 0, 58 - arc * 9, arc * 1.8, arc * 1.8 + 1.15); ctx.stroke();
+      }
+      ctx.restore();
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, -72); ctx.lineTo(16, -30); ctx.lineTo(58, -5); ctx.lineTo(24, 11); ctx.lineTo(42, 54); ctx.lineTo(0, 30); ctx.lineTo(-42, 54); ctx.lineTo(-24, 11); ctx.lineTo(-58, -5); ctx.lineTo(-16, -30); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#17132b";
+      ctx.beginPath(); ctx.moveTo(0, -38); ctx.lineTo(15, 0); ctx.lineTo(0, 24); ctx.lineTo(-15, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = enemy.damaged > 0 ? "#ffffff" : "#8ff5df";
+      ctx.beginPath(); ctx.arc(0, -2, 8 + Math.sin(enemy.age * 5) * 2, 0, TAU); ctx.fill();
     }
     ctx.restore();
+    if (enemy.boss) drawBossParts(enemy);
     if (enemy.boss || enemy.hp < enemy.maxHp) drawHealthBar(enemy);
+  }
+
+  function drawBossParts(enemy) {
+    for (const part of enemy.parts || []) {
+      if (part.dead) continue;
+      const position = bossPartPosition(enemy, part);
+      ctx.save();
+      ctx.translate(position.x, position.y);
+      if (part.orbit) ctx.rotate(part.angle + enemy.age * part.orbitSpeed + Math.PI / 2);
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = enemy.color;
+      ctx.fillStyle = part.damaged > 0 ? "#ffffff" : enemy.color;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.78)";
+      ctx.lineWidth = 1.5;
+      if (part.role === "gun") {
+        ctx.beginPath(); ctx.moveTo(0, -part.r); ctx.lineTo(part.r * 0.78, part.r * 0.65); ctx.lineTo(0, part.r * 0.36); ctx.lineTo(-part.r * 0.78, part.r * 0.65); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#241d25";
+        ctx.fillRect(-3, -part.r - 6, 6, part.r + 8);
+      } else if (part.role === "shield") {
+        ctx.beginPath();
+        for (let point = 0; point < 6; point += 1) {
+          const angle = point * TAU / 6 - Math.PI / 2;
+          const x = Math.cos(angle) * part.r;
+          const y = Math.sin(angle) * part.r;
+          if (point === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#211a2b";
+        ctx.beginPath(); ctx.arc(0, 0, part.r * 0.42, 0, TAU); ctx.fill();
+      } else {
+        ctx.rotate(enemy.age * 1.7);
+        ctx.beginPath(); ctx.moveTo(0, -part.r); ctx.lineTo(part.r, 0); ctx.lineTo(0, part.r); ctx.lineTo(-part.r, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#171329";
+        ctx.beginPath(); ctx.arc(0, 0, part.r * 0.36, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+      const width = part.r * 1.6;
+      ctx.fillStyle = "rgba(2, 9, 9, 0.75)";
+      ctx.fillRect(position.x - width / 2, position.y + part.r + 5, width, 2);
+      ctx.fillStyle = "#ffd665";
+      ctx.fillRect(position.x - width / 2, position.y + part.r + 5, width * Math.max(0, part.hp / part.maxHp), 2);
+    }
   }
 
   function drawHealthBar(enemy) {
@@ -1379,7 +2305,7 @@
   }
 
   function drawPickup(pickup) {
-    const color = pickup.kind === "weapon"
+    const color = pickup.kind === "weapon" || pickup.kind === "armory"
       ? weaponDefs[pickup.weapon].color
       : pickup.kind === "upgrade"
         ? "#8de7ff"
@@ -1391,18 +2317,37 @@
     ctx.rotate(pickup.spin);
     ctx.fillStyle = "rgba(2, 17, 16, 0.78)";
     ctx.beginPath();
-    ctx.arc(0, 0, 20, 0, TAU); ctx.fill();
+    ctx.arc(0, 0, pickup.kind === "armory" ? 24 : 20, 0, TAU); ctx.fill();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = pickup.kind === "armory" ? 2.5 : 2;
+    ctx.shadowBlur = pickup.kind === "armory" ? 12 : 0;
+    ctx.shadowColor = color;
     ctx.beginPath();
-    ctx.moveTo(0, -18); ctx.lineTo(17, 0); ctx.lineTo(0, 18); ctx.lineTo(-17, 0); ctx.closePath(); ctx.stroke();
+    const edge = pickup.kind === "armory" ? 22 : 18;
+    ctx.moveTo(0, -edge); ctx.lineTo(edge - 1, 0); ctx.lineTo(0, edge); ctx.lineTo(-edge + 1, 0); ctx.closePath(); ctx.stroke();
     ctx.restore();
+    if (pickup.kind === "armory") {
+      ctx.save();
+      ctx.translate(pickup.x, pickup.y);
+      ctx.rotate(-Math.PI / 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(0, 0, 28, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = color;
+      ctx.beginPath(); ctx.arc(0, 0, 28, 0, TAU * clamp(pickup.cycleCharge, 0, 1)); ctx.stroke();
+      ctx.restore();
+    }
     ctx.fillStyle = color;
     ctx.font = "900 16px 'Avenir Next Condensed', 'DIN Condensed', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const label = pickup.kind === "weapon" ? weaponDefs[pickup.weapon].pickup : pickup.kind === "upgrade" ? "U" : pickup.kind === "bomb" ? "◆" : "+";
+    const label = pickup.kind === "weapon" || pickup.kind === "armory" ? weaponDefs[pickup.weapon].pickup : pickup.kind === "upgrade" ? "U" : pickup.kind === "bomb" ? "◆" : "+";
     ctx.fillText(label, pickup.x, pickup.y + 1);
+    if (pickup.kind === "armory") {
+      ctx.fillStyle = "rgba(235, 248, 239, 0.78)";
+      ctx.font = "900 7px 'Avenir Next Condensed', 'DIN Condensed', sans-serif";
+      ctx.fillText("FIRE / CYCLE", pickup.x, pickup.y + 37);
+    }
   }
 
   function drawBullet(bullet, enemy = false) {
@@ -1410,7 +2355,7 @@
     ctx.translate(bullet.x, bullet.y);
     const angle = Math.atan2(bullet.vy, bullet.vx) + Math.PI / 2;
     ctx.rotate(angle);
-    ctx.shadowBlur = bullet.rail || bullet.laser ? 12 : 6;
+    ctx.shadowBlur = bullet.overdrive ? 16 : bullet.rail || bullet.laser ? 12 : 6;
     ctx.shadowColor = bullet.color;
     ctx.fillStyle = bullet.color;
     if (enemy && bullet.enemyStyle === "orb") {
@@ -1482,7 +2427,7 @@
     const boss = state.enemies.find((enemy) => enemy.boss && !enemy.dead);
     if (!boss) return;
     const width = 270;
-    const y = 92;
+    const y = 205;
     ctx.fillStyle = "rgba(5, 16, 15, 0.64)";
     ctx.fillRect(W / 2 - width / 2, y, width, 16);
     ctx.strokeStyle = boss.color;
@@ -1492,7 +2437,13 @@
     ctx.fillStyle = "#fff4c9";
     ctx.font = "900 9px 'Avenir Next Condensed', 'DIN Condensed', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(boss.bossTitle, W / 2, y - 5);
+    ctx.fillText(`${boss.bossTitle} // PHASE ${boss.stage}`, W / 2, y - 5);
+    const parts = boss.parts || [];
+    parts.forEach((part, index) => {
+      const pipX = W / 2 - (parts.length - 1) * 7 + index * 14;
+      ctx.fillStyle = part.dead ? "rgba(255,255,255,0.18)" : "#ffd665";
+      ctx.fillRect(pipX - 4, y + 20, 8, 2);
+    });
   }
 
   function render() {
@@ -1500,7 +2451,9 @@
     const shake = state.running && !state.paused ? state.shake : 0;
     if (shake) ctx.translate(random(-shake, shake), random(-shake * 0.55, shake * 0.55));
     drawBackdrop();
+    drawEnvironment();
     drawRings();
+    drawAlly();
     state.pickups.forEach(drawPickup);
     state.bullets.forEach((bullet) => drawBullet(bullet));
     state.enemyBullets.forEach((bullet) => drawBullet(bullet, true));
@@ -1518,6 +2471,7 @@
   function syncUi() {
     const player = state.player;
     const level = currentLevelDef();
+    const mission = state.mission;
     const score = pad(state.score);
     const best = pad(Math.max(state.best, state.score));
     const minutes = Math.floor(state.elapsed / 60);
@@ -1529,9 +2483,33 @@
     ui.railElims.textContent = String(state.eliminations).padStart(3, "0");
     ui.range.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     ui.footerWave.textContent = `L${String(state.level).padStart(2, "0")} // W${String(state.wave).padStart(2, "0")}`;
-    ui.stageSerial.textContent = `${levelLabel()} / ${level.name}`;
-    ui.railSector.textContent = `SECTOR ${String(state.level).padStart(2, "0")}`;
+    ui.stageSerial.textContent = `${levelLabel()} / ${level.name}${currentCycle() > 0 ? ` / CYCLE ${currentCycle() + 1}` : ""}`;
+    ui.railSector.textContent = `SECTOR ${String(state.level).padStart(2, "0")}${currentCycle() > 0 ? ` // C${currentCycle() + 1}` : ""}`;
     ui.comboText.textContent = `x${state.combo}`;
+    ui.overdriveFill.style.width = `${clamp(state.overdriveCharge, 0, 100)}%`;
+    ui.overdriveLabel.textContent = state.overdrive > 0 ? "OVERDRIVE" : "GRAZE";
+    ui.overdriveText.textContent = state.overdrive > 0 ? `${state.overdrive.toFixed(1)}s` : `${String(Math.round(state.overdriveCharge)).padStart(2, "0")}%`;
+    ui.overdriveCard.classList.toggle("is-active", state.overdrive > 0);
+    const objectiveCard = ui.missionTitle.closest(".status-card--objective");
+    if (mission) {
+      const ratio = mission.type === "escort"
+        ? mission.progress / mission.target
+        : mission.progress / Math.max(1, mission.target);
+      ui.missionLabel.textContent = mission.status === "ACTIVE" ? "SIDE MISSION" : `MISSION ${mission.status}`;
+      ui.missionTitle.textContent = mission.title;
+      ui.missionProgress.textContent = mission.type === "escort"
+        ? `${Math.round(mission.progress)}%`
+        : mission.type === "escape"
+          ? `${Math.floor(mission.progress)} / ${mission.target}s`
+          : `${Math.floor(mission.progress)} / ${mission.target}`;
+      ui.missionFill.style.width = `${clamp(ratio * 100, 0, 100)}%`;
+      objectiveCard.classList.toggle("is-complete", mission.success);
+      objectiveCard.classList.toggle("is-failed", mission.resolved && !mission.success);
+    }
+    ui.environmentLabel.textContent = `${state.environment?.name || "AIRSPACE NOMINAL"} // SIGNAL ${state.signalFragments}/4`;
+    const module = moduleDefs[state.module] || moduleDefs.none;
+    ui.moduleName.textContent = state.module === "aegis" && player ? `${module.name} // ${player.moduleCharges}` : module.name;
+    ui.moduleChip.style.borderColor = module.color;
     if (!player) return;
     const def = weaponDefs[player.weapon];
     const health = Math.max(0, Math.round(player.hp));
@@ -1572,6 +2550,16 @@
       hit: [170, 58, "square", 0.06, 0.13],
       pickup: [440, 880, "triangle", 0.06, 0.15],
       upgrade: [520, 1040, "triangle", 0.075, 0.22],
+      armory: [370, 740, "square", volume || 0.035, 0.1],
+      graze: [760, 1180, "sine", volume || 0.025, 0.07],
+      overdrive: [180, 1320, "sawtooth", 0.085, 0.38],
+      mission: [420, 1120, "triangle", 0.07, 0.3],
+      route: [240, 690, "sine", 0.055, 0.25],
+      phase: [160, 620, "square", 0.065, 0.28],
+      part: [210, 68, "sawtooth", 0.075, 0.24],
+      shield: [840, 310, "sine", 0.06, 0.2],
+      lightning: [1200, 58, "sawtooth", 0.07, 0.2],
+      heat: [92, 42, "sawtooth", 0.055, 0.24],
       level: [190, 720, "sine", 0.065, 0.32],
       clear: [330, 990, "triangle", 0.085, 0.45],
       special: [90, 880, "sine", 0.1, 0.54],
@@ -1626,8 +2614,13 @@
   }
 
   window.addEventListener("keydown", (event) => {
-    const codes = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS", "Space", "KeyP", "Escape", "Enter"];
+    const codes = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS", "Space", "KeyP", "Escape", "Enter", "Digit1", "Digit2"];
     if (codes.includes(event.code)) event.preventDefault();
+    if (state.routeOpen && (event.code === "Digit1" || event.code === "Digit2")) {
+      const route = currentLevelDef().routes[event.code === "Digit1" ? 0 : 1];
+      selectRoute(route);
+      return;
+    }
     if (event.code === "Space" && !event.repeat) {
       if (!state.running) startGame();
       else triggerSpecial();
@@ -1647,7 +2640,7 @@
   });
 
   canvas.addEventListener("pointerdown", (event) => {
-    if (!state.running || state.paused || state.pointer.active) return;
+    if (!state.running || state.paused || state.routeOpen || state.pointer.active) return;
     const position = pointerPosition(event);
     Object.assign(state.pointer, {
       active: true,
