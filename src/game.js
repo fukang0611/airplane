@@ -152,6 +152,36 @@
       mission: { type: "escape", title: "ESCAPE // COLLAPSE WINDOW", target: 24 },
       routes: ["riftSafe", "riftRisk"],
     },
+    {
+      name: "RAZOR CANYON",
+      subtitle: "LOW ALTITUDE CHASE",
+      theme: "canyon",
+      difficulty: 2.28,
+      waves: [
+        { label: "RIDGE RUN", groups: [{ type: "striker", formation: "vee", count: 4, squad: "ridge" }, { type: "skimmer", formation: "stagger", count: 6, squad: "ridge" }, { type: "scout", formation: "flank", count: 5, gap: 0.5, squad: "ridge" }] },
+        { label: "NARROW CUT", groups: [{ type: "jammer", formation: "line", count: 1, squad: "cut" }, { type: "rammer", formation: "vee", count: 4, squad: "cut" }, { type: "fighter", formation: "arc", count: 5, gap: 0.55, squad: "cut" }] },
+        { label: "ECHO WALLS", groups: [{ type: "phantom", formation: "flank", count: 3 }, { type: "striker", formation: "line", count: 5 }, { type: "skimmer", formation: "flank", count: 6, gap: 0.52 }] },
+      ],
+      boss: "tempest",
+      environment: { type: "canyon", name: "CANYON SLALOM" },
+      mission: { type: "raid", title: "RAID // GROUND BATTERIES", target: 4 },
+      routes: ["canyonSafe", "canyonRisk"],
+    },
+    {
+      name: "ORBITAL LIFT",
+      subtitle: "ELEVATOR ASCENT",
+      theme: "elevator",
+      difficulty: 2.55,
+      waves: [
+        { label: "SHAFT ENTRY", groups: [{ type: "turret", formation: "flank", count: 4, squad: "shaft" }, { type: "bomber", formation: "line", count: 3, squad: "shaft" }, { type: "fighter", formation: "stagger", count: 4, gap: 0.6, squad: "shaft" }] },
+        { label: "CLAMP DECK", groups: [{ type: "bulwark", formation: "line", count: 1, squad: "clamp" }, { type: "mender", formation: "line", count: 1, squad: "clamp" }, { type: "turret", formation: "arc", count: 4, squad: "clamp" }, { type: "prism", formation: "line", count: 3, gap: 0.7, squad: "clamp" }] },
+        { label: "CROWN RISE", groups: [{ type: "commander", formation: "line", count: 1 }, { type: "bomber", formation: "vee", count: 4 }, { type: "wraith", formation: "flank", count: 5, gap: 0.58 }] },
+      ],
+      boss: "dreadnought",
+      environment: { type: "elevator", name: "ORBITAL ELEVATOR" },
+      mission: { type: "raid", title: "RAID // CLAMP NODES", target: 3 },
+      routes: ["elevatorSafe", "elevatorRisk"],
+    },
   ];
 
   const themeDefs = {
@@ -159,6 +189,8 @@
     storm: { sky: ["#1a3447", "#0b1b35", "#050c1d"], stars: ["#d6f3ff", "#78c7ff", "#efffbc", "#91aef8"], line: "#8ee6ff", accent: "#b4e7ff" },
     forge: { sky: ["#3b211b", "#241411", "#0c0a0a"], stars: ["#ffba6f", "#ff6f5d", "#ffd27a", "#d58d69"], line: "#ff9b5f", accent: "#ffdd8a" },
     rift: { sky: ["#14283a", "#0e1530", "#050712"], stars: ["#92f1df", "#b9b1ff", "#e5d3ff", "#7acffd"], line: "#96e9dc", accent: "#d4a7ff" },
+    canyon: { sky: ["#2a2118", "#17110d", "#080705"], stars: ["#ffd29a", "#e2b57a", "#9fd7c5", "#f0e0b8"], line: "#e2b57a", accent: "#ff9b69" },
+    elevator: { sky: ["#1a2438", "#10182a", "#070a12"], stars: ["#9ad7ff", "#d7e8ff", "#ffd878", "#8fe0c8"], line: "#8ecbff", accent: "#69f7d0" },
   };
 
   const moduleDefs = {
@@ -191,8 +223,12 @@
     stormRisk: { name: "FOUNDRY RAID", detail: "Faster weapons against reinforced formations.", module: "arsenal", pressure: 0.2, score: 1.3, color: "#ff9b69", tag: "RISK +30%" },
     forgeSafe: { name: "WARDEN CORRIDOR", detail: "Secure salvage and load an additional ion cell.", module: "magnet", pressure: 0.04, score: 1.1, repair: 18, bombs: 1, color: "#9cf0d9", tag: "SALVAGE" },
     forgeRisk: { name: "RIFT SLINGSHOT", detail: "Phase through a volatile anomaly for a score surge.", module: "phase", pressure: 0.24, score: 1.38, charge: 56, color: "#d4a7ff", tag: "RISK +38%" },
-    riftSafe: { name: "DAWN RETURN", detail: "Re-arm the Aegis shell before the next combat cycle.", module: "aegis", pressure: 0.08, score: 1.15, repair: 40, bombs: 1, color: "#69f7d0", tag: "CYCLE SAFE" },
-    riftRisk: { name: "ECHO DESCENT", detail: "Descend deeper; every formation mutates faster.", module: "reactor", pressure: 0.3, score: 1.55, charge: 70, color: "#ff7ee5", tag: "CYCLE +55%" },
+    riftSafe: { name: "CANYON RUNWAY", detail: "Drop into the ravine with salvage magnets and armor packs.", module: "magnet", pressure: 0.1, score: 1.18, repair: 28, bombs: 1, color: "#e2b57a", tag: "CANYON" },
+    riftRisk: { name: "RIDGE BREAK", detail: "Force a high-speed canyon run with phase veils.", module: "phase", pressure: 0.28, score: 1.42, charge: 48, color: "#ff9b69", tag: "RISK +42%" },
+    canyonSafe: { name: "SERVICE LIFT", detail: "Board a controlled shaft with nanoforge support.", module: "nanoforge", pressure: 0.12, score: 1.2, repair: 32, color: "#8ecbff", tag: "ASCENT" },
+    canyonRisk: { name: "EXPRESS SHAFT", detail: "Ride an overloaded elevator under heavier fire.", module: "arsenal", pressure: 0.3, score: 1.48, charge: 42, color: "#ffd665", tag: "RISK +48%" },
+    elevatorSafe: { name: "DAWN RETURN", detail: "Re-arm the Aegis shell before the next combat cycle.", module: "aegis", pressure: 0.08, score: 1.15, repair: 40, bombs: 1, color: "#69f7d0", tag: "CYCLE SAFE" },
+    elevatorRisk: { name: "ECHO DESCENT", detail: "Descend deeper; every formation mutates faster.", module: "reactor", pressure: 0.32, score: 1.58, charge: 70, color: "#ff7ee5", tag: "CYCLE +58%" },
   };
 
   const bossPartDefs = {
@@ -260,6 +296,7 @@
     overdriveMax: 0,
     grazes: 0,
     environment: null,
+    scene: null,
     hazards: [],
     mission: null,
     ally: null,
@@ -404,7 +441,8 @@
     state.stars = Array.from({ length: 112 }, () => ({
       x: random(0, W), y: random(0, H), z: random(0.25, 1), size: random(0.6, 2), hue: choose(theme.stars),
     }));
-    state.streaks = Array.from({ length: currentLevelDef().theme === "storm" ? 34 : 14 }, () => ({ x: random(0, W), y: random(0, H), len: random(8, 26), speed: random(120, 290) }));
+    const streakCount = currentLevelDef().theme === "storm" ? 34 : currentLevelDef().theme === "canyon" ? 28 : currentLevelDef().theme === "elevator" ? 22 : 14;
+    state.streaks = Array.from({ length: streakCount }, () => ({ x: random(0, W), y: random(0, H), len: random(8, 26), speed: random(120, 290) }));
     state.backdropTime = 0;
     state.weatherFlash = 0;
     state.nextWeatherFlash = random(3.8, 7.5);
@@ -412,13 +450,63 @@
 
   function initEnvironment() {
     const environment = currentLevelDef().environment;
+    const sceneTimer = environment.type === "canyon" ? 1.4 : environment.type === "elevator" ? 1.7 : environment.type === "slipstream" ? 2.2 : 3.2;
     state.environment = {
       type: environment.type,
       name: environment.name,
-      timer: environment.type === "slipstream" ? 2.2 : 3.2,
+      timer: sceneTimer,
       pulse: 0,
     };
     state.hazards = [];
+    if (environment.type === "canyon") {
+      state.scene = { type: "canyon", scroll: 0, speed: 155, baseSpeed: 155, surgeTimer: 0, left: 70, right: W - 70, scrapeCooldown: 0 };
+    } else if (environment.type === "elevator") {
+      state.scene = { type: "elevator", scroll: 0, speed: 98, baseSpeed: 98, surgeTimer: 0, left: 86, right: W - 86, scrapeCooldown: 0 };
+    } else {
+      state.scene = null;
+    }
+  }
+
+  function damageSceneHazard(hazard, amount) {
+    if (!hazard || hazard.dead || !hazard.destroyable) return false;
+    hazard.hp -= amount;
+    hazard.hitPulse = 0.14;
+    if (hazard.hp > 0) {
+      burst(hazard.x, hazard.y, hazard.color || "#d8c3a5", 4, 70, 0.18);
+      return false;
+    }
+    hazard.dead = true;
+    const reward = Math.round(((hazard.mission ? 520 : 240) + currentCycle() * 80) * (state.routeModifier.score || 1));
+    state.score += reward;
+    addOverdrive(hazard.mission ? 11 : 5);
+    state.shake = Math.max(state.shake, hazard.mission ? 5.5 : 3.5);
+    burst(hazard.x, hazard.y, hazard.color || "#ffd665", hazard.mission ? 18 : 12, 140, 0.45);
+    state.rings.push({ x: hazard.x, y: hazard.y, r: 4, max: hazard.mission ? 64 : 42, life: 0.3, maxLife: 0.3, color: hazard.color || "#ffd665", damage: 0, hits: new Set() });
+    state.floating.push({ x: hazard.x, y: hazard.y - 18, text: `+${reward}`, color: hazard.color || "#ffd665", life: 0.75, maxLife: 0.75 });
+    if (hazard.mission && state.mission && !state.mission.resolved && state.mission.type === "raid") {
+      state.mission.progress += 1;
+      if (state.mission.progress >= state.mission.target) resolveMission(true);
+    }
+    tone("part", 0.028);
+    return true;
+  }
+
+  function hitSceneHazards(projectile, amount, markSet = false) {
+    let hit = false;
+    for (const hazard of state.hazards) {
+      if (hazard.dead || !hazard.destroyable) continue;
+      if (markSet) {
+        projectile.hitIds ||= new Set();
+        if (projectile.hitIds.has(hazard)) continue;
+      }
+      const radius = hazard.r || Math.max(hazard.w || 0, hazard.h || 0) * 0.45;
+      if (distance(projectile, hazard) >= (projectile.r || 8) + radius) continue;
+      if (markSet) projectile.hitIds.add(hazard);
+      damageSceneHazard(hazard, amount);
+      hit = true;
+      if (!projectile.pierce || projectile.hits >= projectile.pierce) break;
+    }
+    return hit;
   }
 
   function initMission() {
@@ -558,6 +646,7 @@
     state.secretBossActive = false;
     state.secretBossDefeated = false;
     state.environment = null;
+    state.scene = null;
     state.hazards = [];
     state.mission = null;
     state.ally = null;
@@ -1439,6 +1528,68 @@
       } else if (environment.type === "gravity") {
         state.hazards.push({ kind: "gravity", x: random(90, W - 90), y: random(260, 585), r: 24, life: 4.7, maxLife: 4.7, captured: 0, dead: false });
         environment.timer = Math.max(4.2, 6.8 - currentCycle() * 0.35 - pressure * 2);
+      } else if (environment.type === "canyon") {
+        const scene = state.scene;
+        const laneLeft = (scene?.left || 70) + 36;
+        const laneRight = (scene?.right || W - 70) - 36;
+        if (Math.random() < 0.58) {
+          const hp = 58 + currentCycle() * 16 + state.level * 2;
+          state.hazards.push({ kind: "pillar", x: random(laneLeft, laneRight), y: -48, r: random(18, 27), hp, maxHp: hp, destroyable: true, color: "#d2b48c", dead: false, hitPulse: 0 });
+        } else {
+          const hp = 78 + currentCycle() * 20 + state.level * 3;
+          state.hazards.push({ kind: "ground", x: random(laneLeft, laneRight), y: -36, r: 22, hp, maxHp: hp, destroyable: true, mission: true, color: "#ffd665", dead: false, hitPulse: 0 });
+        }
+        environment.timer = Math.max(1.25, 2.35 - currentCycle() * 0.14 - pressure * 1.4);
+      } else if (environment.type === "elevator") {
+        const scene = state.scene;
+        const laneLeft = (scene?.left || 86) + 30;
+        const laneRight = (scene?.right || W - 86) - 30;
+        if (Math.random() < 0.5) {
+          const hp = 90 + currentCycle() * 22;
+          state.hazards.push({ kind: "platform", x: random(laneLeft, laneRight), y: -40, r: 28, w: random(70, 110), h: 18, hp, maxHp: hp, destroyable: true, color: "#8ecbff", dead: false, hitPulse: 0 });
+        } else {
+          const hp = 96 + currentCycle() * 24;
+          state.hazards.push({ kind: "clamp", x: random(laneLeft, laneRight), y: -34, r: 20, hp, maxHp: hp, destroyable: true, mission: true, color: "#69f7d0", dead: false, hitPulse: 0 });
+        }
+        environment.timer = Math.max(1.4, 2.7 - currentCycle() * 0.15 - pressure * 1.3);
+      }
+    }
+
+    if (state.scene) {
+      const scene = state.scene;
+      scene.surgeTimer += dt;
+      if (scene.type === "canyon") {
+        const pulse = 0.62 + 0.38 * Math.sin(scene.surgeTimer * 0.9);
+        const squeeze = 8 + Math.sin(scene.surgeTimer * 0.52) * 20 + currentCycle() * 2;
+        scene.speed = scene.baseSpeed * (1.08 + pulse * 0.82 + Math.max(0, state.routeModifier.pressure || 0));
+        scene.left = clamp(52 + squeeze, 48, 120);
+        scene.right = W - scene.left;
+      } else if (scene.type === "elevator") {
+        const climb = Math.min(1.95, 1 + scene.surgeTimer * 0.04 + currentCycle() * 0.05);
+        scene.speed = scene.baseSpeed * climb * (1 + Math.max(0, state.routeModifier.pressure || 0) * 0.5);
+        const sway = Math.sin(scene.surgeTimer * 0.42) * 10;
+        scene.left = clamp(78 + sway, 64, 130);
+        scene.right = W - scene.left;
+      }
+      scene.scroll += scene.speed * dt;
+      scene.scrapeCooldown = Math.max(0, scene.scrapeCooldown - dt);
+      if (state.player && !["clear", "route", "intro"].includes(state.levelPhase)) {
+        const player = state.player;
+        if (player.x - player.r < scene.left) {
+          player.x = scene.left + player.r;
+          if (scene.scrapeCooldown <= 0) {
+            damagePlayer(10);
+            scene.scrapeCooldown = 0.42;
+            burst(player.x - 8, player.y, "#c4a484", 6, 80, 0.22);
+          }
+        } else if (player.x + player.r > scene.right) {
+          player.x = scene.right - player.r;
+          if (scene.scrapeCooldown <= 0) {
+            damagePlayer(10);
+            scene.scrapeCooldown = 0.42;
+            burst(player.x + 8, player.y, "#c4a484", 6, 80, 0.22);
+          }
+        }
       }
     }
 
@@ -1496,6 +1647,16 @@
           state.rings.push({ x: hazard.x, y: hazard.y, r: 6, max: 95, life: 0.42, maxLife: 0.42, color: "#d4a7ff", damage: 24 + hazard.captured * 2, hits: new Set() });
           burst(hazard.x, hazard.y, "#d4a7ff", 18, 150, 0.55);
         }
+      } else if (hazard.kind === "pillar" || hazard.kind === "ground" || hazard.kind === "platform" || hazard.kind === "clamp") {
+        hazard.hitPulse = Math.max(0, (hazard.hitPulse || 0) - dt);
+        const scroll = (state.scene?.speed || 140) * (hazard.kind === "platform" ? 0.88 : 1);
+        hazard.y += scroll * dt;
+        if (state.player && !hazard.dead && distance(hazard, state.player) < (hazard.r || 20) + state.player.r - 3) {
+          damagePlayer(hazard.mission ? 13 : 17);
+          if (hazard.destroyable) damageSceneHazard(hazard, 36);
+          else hazard.dead = true;
+        }
+        if (hazard.y > H + 70) hazard.dead = true;
       }
     }
     state.hazards = state.hazards.filter((hazard) => !hazard.dead);
@@ -1590,9 +1751,11 @@
           enemy.x += steer * enemy.speed * 0.82 * dt;
           enemy.y += enemy.speed * (enemy.age > 0.8 ? 1.22 : 0.72) * dt;
         } else {
-          enemy.y += enemy.speed * dt;
+          const scrollBoost = state.scene ? state.scene.speed * 0.12 : 0;
+          enemy.y += (enemy.speed + scrollBoost) * dt;
         }
-        enemy.x = clamp(enemy.x, 26, W - 26);
+        if (state.scene) enemy.x = clamp(enemy.x, state.scene.left + 18, state.scene.right - 18);
+        else enemy.x = clamp(enemy.x, 26, W - 26);
       }
       enemy.shoot -= dt;
       if (enemy.shoot <= 0 && enemy.y > 40 && enemy.y < H - 110) {
@@ -1687,6 +1850,13 @@
       for (const pickup of state.pickups) {
         if (!pickup.dead && pickup.kind === "armory") hitArmoryCore(bullet, pickup);
       }
+      if (!bullet.dead && hitSceneHazards(bullet, bullet.damage, true)) {
+        bullet.hits += 1;
+        if (bullet.gravity) collapseGravityBullet(bullet);
+        else if (bullet.plasma) { explodePlasma(bullet); bullet.dead = true; }
+        else if (bullet.hits >= bullet.pierce) bullet.dead = true;
+      }
+      if (bullet.dead) continue;
       for (const enemy of state.enemies) {
         if (enemy.dead || bullet.dead) continue;
         if (enemy.boss) {
@@ -1774,6 +1944,13 @@
         if (distance(ring, enemy) < ring.r + enemy.r) {
           ring.hits.add(enemy);
           damageEnemy(enemy, ring.damage, ring.special);
+        }
+      }
+      for (const hazard of state.hazards) {
+        if (hazard.dead || !hazard.destroyable || ring.hits.has(hazard)) continue;
+        if (distance(ring, hazard) < ring.r + (hazard.r || 20)) {
+          ring.hits.add(hazard);
+          damageSceneHazard(hazard, ring.damage * (ring.special ? 1.1 : 0.85));
         }
       }
       if (ring.life <= 0) ring.dead = true;
@@ -2011,12 +2188,12 @@
     const theme = currentLevelDef().theme;
     state.backdropTime += dt;
     for (const star of state.stars) {
-      const themeSpeed = theme === "storm" ? 1.45 : theme === "rift" ? 0.72 : 1;
+      const themeSpeed = theme === "storm" ? 1.45 : theme === "rift" ? 0.72 : theme === "canyon" ? 1.7 : theme === "elevator" ? 1.35 : 1;
       star.y += (42 + star.z * 142) * themeSpeed * dt;
       if (star.y > H + 8) { star.y = -8; star.x = random(0, W); }
     }
     for (const streak of state.streaks) {
-      streak.y += streak.speed * (theme === "storm" ? 1.55 : 1) * dt;
+      streak.y += streak.speed * (theme === "storm" ? 1.55 : theme === "canyon" ? 1.8 : theme === "elevator" ? 1.4 : 1) * dt;
       if (streak.y > H + 30) { streak.y = -random(10, 180); streak.x = random(0, W); }
     }
     if (theme === "storm") {
@@ -2218,6 +2395,112 @@
     drawPerspectiveGrid(currentTheme().line, 244);
   }
 
+  function drawCanyonScene() {
+    const scene = state.scene;
+    const left = scene?.left ?? 70;
+    const right = scene?.right ?? W - 70;
+    const scroll = scene?.scroll || 0;
+    ctx.save();
+    // canyon walls
+    const wallGradL = ctx.createLinearGradient(0, 0, left, 0);
+    wallGradL.addColorStop(0, "#3a2a1c");
+    wallGradL.addColorStop(1, "rgba(58,42,28,0.15)");
+    ctx.fillStyle = wallGradL;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    for (let y = 0; y <= H; y += 18) {
+      const jag = Math.sin((y + scroll) * 0.045) * 10 + Math.sin((y + scroll) * 0.11) * 5;
+      ctx.lineTo(left - 8 + jag, y);
+    }
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fill();
+    const wallGradR = ctx.createLinearGradient(W, 0, right, 0);
+    wallGradR.addColorStop(0, "#3a2a1c");
+    wallGradR.addColorStop(1, "rgba(58,42,28,0.15)");
+    ctx.fillStyle = wallGradR;
+    ctx.beginPath();
+    ctx.moveTo(W, 0);
+    for (let y = 0; y <= H; y += 18) {
+      const jag = Math.sin((y + scroll) * 0.045 + 1.7) * 10 + Math.sin((y + scroll) * 0.11 + 0.8) * 5;
+      ctx.lineTo(right + 8 - jag, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+    // ridge strata
+    ctx.strokeStyle = "rgba(226,181,122,0.22)";
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 10; i += 1) {
+      const y = ((scroll * 0.7 + i * 110) % (H + 40)) - 20;
+      ctx.beginPath();
+      ctx.moveTo(8, y);
+      ctx.lineTo(left - 6, y + 12);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(W - 8, y + 6);
+      ctx.lineTo(right + 6, y + 18);
+      ctx.stroke();
+    }
+    // speed lines
+    ctx.globalAlpha = 0.18 + Math.min(0.25, (scene?.speed || 0) / 900);
+    ctx.strokeStyle = "#ffd29a";
+    for (let i = 0; i < 12; i += 1) {
+      const x = left + 20 + (i * 37 + scroll * 0.2) % Math.max(40, right - left - 40);
+      const y = ((scroll * 1.4 + i * 90) % (H + 60)) - 30;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y + 28 + (scene?.speed || 100) * 0.04);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawElevatorScene() {
+    const scene = state.scene;
+    const left = scene?.left ?? 86;
+    const right = scene?.right ?? W - 86;
+    const scroll = scene?.scroll || 0;
+    ctx.save();
+    // shaft walls
+    ctx.fillStyle = "rgba(20, 34, 56, 0.88)";
+    ctx.fillRect(0, 0, left, H);
+    ctx.fillRect(right, 0, W - right, H);
+    // rails
+    ctx.strokeStyle = "#8ecbff";
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.moveTo(left + 6, 0); ctx.lineTo(left + 6, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(right - 6, 0); ctx.lineTo(right - 6, H); ctx.stroke();
+    ctx.globalAlpha = 0.28;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(left + 16, 0); ctx.lineTo(left + 16, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(right - 16, 0); ctx.lineTo(right - 16, H); ctx.stroke();
+    // climbing rungs / floor marks
+    ctx.globalAlpha = 0.34;
+    ctx.strokeStyle = "#69f7d0";
+    for (let i = 0; i < 14; i += 1) {
+      const y = ((-scroll * 0.95 + i * 86) % (H + 50)) - 20;
+      ctx.beginPath();
+      ctx.moveTo(left + 4, y);
+      ctx.lineTo(right - 4, y);
+      ctx.stroke();
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = "#8ecbff";
+      ctx.fillRect(left + 10, y - 3, 10, 6);
+      ctx.fillRect(right - 20, y - 3, 10, 6);
+      ctx.globalAlpha = 0.34;
+    }
+    // ascent glow
+    const glow = ctx.createLinearGradient(0, H, 0, H * 0.45);
+    glow.addColorStop(0, "rgba(105,247,208,0.12)");
+    glow.addColorStop(1, "rgba(105,247,208,0)");
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = glow;
+    ctx.fillRect(left, 0, right - left, H);
+    ctx.restore();
+  }
+
   function drawBackdrop() {
     const level = currentLevelDef();
     const theme = currentTheme();
@@ -2252,6 +2535,8 @@
     if (level.theme === "storm") drawStormScene();
     if (level.theme === "forge") drawForgeScene();
     if (level.theme === "rift") drawRiftScene();
+    if (level.theme === "canyon") drawCanyonScene();
+    if (level.theme === "elevator") drawElevatorScene();
   }
 
   function drawEnvironment() {
@@ -2333,6 +2618,45 @@
         ctx.globalAlpha = 0.85;
         ctx.fillStyle = "#080714";
         ctx.beginPath(); ctx.arc(0, 0, 11 + hazard.captured * 0.45, 0, TAU); ctx.fill();
+      } else if (hazard.kind === "pillar" || hazard.kind === "ground" || hazard.kind === "platform" || hazard.kind === "clamp") {
+        ctx.translate(hazard.x, hazard.y);
+        const pulse = hazard.hitPulse > 0 ? 0.35 : 0;
+        ctx.globalAlpha = 0.9;
+        if (hazard.kind === "pillar") {
+          ctx.fillStyle = pulse ? "#fff1d2" : hazard.color;
+          ctx.beginPath();
+          ctx.moveTo(-hazard.r * 0.7, hazard.r);
+          ctx.lineTo(-hazard.r * 0.55, -hazard.r);
+          ctx.lineTo(hazard.r * 0.55, -hazard.r * 0.85);
+          ctx.lineTo(hazard.r * 0.75, hazard.r);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "rgba(0,0,0,0.28)";
+          ctx.fillRect(-hazard.r * 0.2, -hazard.r * 0.5, hazard.r * 0.4, hazard.r);
+        } else if (hazard.kind === "platform") {
+          ctx.fillStyle = pulse ? "#e8f6ff" : hazard.color;
+          ctx.fillRect(-(hazard.w || 80) / 2, -(hazard.h || 16) / 2, hazard.w || 80, hazard.h || 16);
+          ctx.strokeStyle = "rgba(255,255,255,0.35)";
+          ctx.strokeRect(-(hazard.w || 80) / 2, -(hazard.h || 16) / 2, hazard.w || 80, hazard.h || 16);
+        } else {
+          // ground battery / clamp node
+          ctx.fillStyle = pulse ? "#fff7d0" : hazard.color;
+          ctx.beginPath();
+          ctx.arc(0, 0, hazard.r, 0, TAU);
+          ctx.fill();
+          ctx.strokeStyle = "rgba(0,0,0,0.35)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.fillStyle = "#1a1a14";
+          ctx.beginPath();
+          ctx.arc(0, 0, hazard.r * 0.35, 0, TAU);
+          ctx.fill();
+          // hp pip
+          ctx.fillStyle = "rgba(0,0,0,0.45)";
+          ctx.fillRect(-hazard.r, hazard.r + 4, hazard.r * 2, 3);
+          ctx.fillStyle = hazard.color;
+          ctx.fillRect(-hazard.r, hazard.r + 4, hazard.r * 2 * Math.max(0, hazard.hp / hazard.maxHp), 3);
+        }
       }
       ctx.restore();
     }
@@ -3127,7 +3451,8 @@
       objectiveCard.classList.toggle("is-complete", mission.success);
       objectiveCard.classList.toggle("is-failed", mission.resolved && !mission.success);
     }
-    ui.environmentLabel.textContent = `${state.environment?.name || "AIRSPACE NOMINAL"} // SIGNAL ${state.signalFragments}/4${state.jamStrength > 0.08 ? ` // JAM ${Math.round(state.jamStrength * 100)}%` : ""}`;
+    const sceneSpeed = state.scene ? ` // SPD ${Math.round(state.scene.speed)}` : "";
+    ui.environmentLabel.textContent = `${state.environment?.name || "AIRSPACE NOMINAL"}${sceneSpeed} // SIGNAL ${state.signalFragments}/4${state.jamStrength > 0.08 ? ` // JAM ${Math.round(state.jamStrength * 100)}%` : ""}`;
     const module = moduleDefs[state.module] || moduleDefs.none;
     ui.moduleName.textContent = state.module === "aegis" && player ? `${module.name} // ${player.moduleCharges}` : module.name;
     ui.moduleChip.style.borderColor = module.color;
@@ -3316,6 +3641,7 @@
     window.__skybreakerDebug = {
       state,
       startGame,
+      startLevel,
       spawnEnemy,
       spawnPickup,
       deployWingman: (role) => {
