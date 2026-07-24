@@ -367,6 +367,61 @@ button { font: inherit; }
 .module-chip span { color: #7fa79e; font-size: 7px; font-weight: 800; letter-spacing: 0.09em; }
 .module-chip b { color: #dff8f0; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; }
 
+.wingman-chip {
+  --wing-color: #6f8f86;
+  position: absolute;
+  right: 14px;
+  bottom: 15px;
+  display: grid;
+  width: 146px;
+  min-height: 41px;
+  gap: 3px;
+  padding: 6px 10px 6px 9px;
+  border: 0;
+  border-right: 3px solid var(--wing-color);
+  border-radius: 0;
+  background: linear-gradient(270deg, rgba(5, 18, 18, 0.86), rgba(5, 18, 18, 0.2));
+  color: #dff8f0;
+  font-family: var(--display);
+  text-align: left;
+  opacity: 0.62;
+  pointer-events: auto;
+  cursor: default;
+  transition: border-color 160ms ease, opacity 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.wingman-chip > span {
+  display: grid;
+  grid-template-columns: 17px 1fr auto;
+  align-items: center;
+  gap: 5px;
+}
+
+.wingman-chip i {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border: 1px solid var(--wing-color);
+  color: var(--wing-color);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+  clip-path: polygon(50% 0, 100% 28%, 100% 72%, 50% 100%, 0 72%, 0 28%);
+}
+
+.wingman-chip b,
+.wingman-chip em,
+.wingman-chip small { overflow: hidden; letter-spacing: 0; text-overflow: ellipsis; white-space: nowrap; }
+.wingman-chip b { color: #edf8ed; font-size: 9px; font-weight: 900; }
+.wingman-chip em { color: var(--wing-color); font-size: 7px; font-style: normal; font-weight: 900; }
+.wingman-chip small { display: block; color: #72968e; font-size: 7px; font-weight: 800; }
+.wingman-chip.is-online { opacity: 0.96; }
+.wingman-chip.is-switchable { cursor: pointer; }
+.wingman-chip.is-switchable:hover,
+.wingman-chip.is-switchable:focus-visible { background: linear-gradient(270deg, rgba(8, 31, 29, 0.96), rgba(7, 25, 24, 0.36)); transform: translateX(-2px); }
+.wingman-chip:focus-visible { outline: 1px solid var(--wing-color); outline-offset: 2px; }
+
 .alert-banner {
   position: absolute;
   z-index: 3;
@@ -849,6 +904,11 @@ button { font: inherit; }
   .status-card--objective { top: 67px; left: 9px; width: 164px; padding: 6px 8px 7px; }
   .status-card--objective strong { font-size: 9px; }
   .module-chip { bottom: 12px; left: 10px; min-width: 96px; padding: 5px 7px 5px 10px; }
+  .wingman-chip { right: 9px; bottom: 70px; width: 126px; min-height: 37px; padding: 5px 8px; }
+  .wingman-chip > span { grid-template-columns: 15px 1fr auto; gap: 4px; }
+  .wingman-chip i { width: 14px; height: 14px; font-size: 7px; }
+  .wingman-chip b { font-size: 8px; }
+  .wingman-chip small { font-size: 6px; }
   .route-panel { padding: 18px; }
   .route-panel h2 { font-size: 25px; }
   .route-panel p { margin-bottom: 13px; font-size: 9px; }

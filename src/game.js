@@ -50,6 +50,11 @@
     routeSummary: document.querySelector("#routeSummary"),
     routeOptions: document.querySelector("#routeOptions"),
     signalReadout: document.querySelector("#signalReadout"),
+    wingmanButton: document.querySelector("#wingmanButton"),
+    wingmanIcon: document.querySelector("#wingmanIcon"),
+    wingmanName: document.querySelector("#wingmanName"),
+    wingmanRole: document.querySelector("#wingmanRole"),
+    wingmanStatus: document.querySelector("#wingmanStatus"),
   };
 
   const weaponDefs = {
@@ -59,6 +64,9 @@
     plasma: { name: "PLASMA", detail: "ARC ORBS", color: "#ff9177", rate: 0.27, pickup: "P" },
     rail: { name: "RAIL", detail: "PIERCE SHOT", color: "#f4edf6", rate: 0.23, pickup: "R" },
     homing: { name: "HOMING", detail: "SEEKER POD", color: "#de94ff", rate: 0.3, pickup: "H" },
+    arc: { name: "ARC", detail: "CHAIN CONDUCTOR", color: "#a7ffe7", rate: 0.23, pickup: "A" },
+    gravity: { name: "GRAVITY", detail: "SINGULARITY CANNON", color: "#b8a7ff", rate: 0.52, pickup: "G" },
+    blade: { name: "BLADE", detail: "RETURNING EDGE", color: "#ffb77c", rate: 0.31, pickup: "B" },
   };
   const weaponKeys = Object.keys(weaponDefs);
   const enemyDefs = {
@@ -70,6 +78,12 @@
     turret: { hp: 108, r: 25, speed: 64, score: 410, color: "#ffad62", motion: "anchor", attack: "lanes", cadence: 2.15, bullet: "shell" },
     wraith: { hp: 78, r: 22, speed: 104, score: 470, color: "#d49aff", motion: "phase", attack: "cross", cadence: 1.85, bullet: "orb" },
     prism: { hp: 150, r: 28, speed: 69, score: 620, color: "#90f0d6", motion: "orbit", attack: "radial", cadence: 1.7, bullet: "orb" },
+    bulwark: { hp: 168, r: 27, speed: 59, score: 620, color: "#68e6d4", motion: "anchor", attack: "fan", cadence: 3.1, bullet: "orb", supportRole: "shield", supportRange: 168 },
+    mender: { hp: 136, r: 24, speed: 62, score: 690, color: "#91f3ad", motion: "glide", attack: "aim", cadence: 3.25, bullet: "spark", supportRole: "repair", supportRange: 178 },
+    commander: { hp: 208, r: 30, speed: 55, score: 880, color: "#ffd66e", motion: "anchor", attack: "command", cadence: 2.55, bullet: "shard", supportRole: "command", supportRange: 196 },
+    jammer: { hp: 152, r: 25, speed: 74, score: 760, color: "#ee9cff", motion: "orbit", attack: "jam", cadence: 2.85, bullet: "orb", supportRole: "jammer", supportRange: 225 },
+    phantom: { hp: 102, r: 22, speed: 116, score: 610, color: "#b49bff", motion: "phase", attack: "cross", cadence: 2.15, bullet: "shard", stealth: true },
+    rammer: { hp: 68, r: 19, speed: 168, score: 480, color: "#ff6d65", motion: "ram", attack: "ram", cadence: 9, bullet: "bolt", rammer: true },
     carrier: { hp: 1450, r: 73, speed: 98, score: 4500, color: "#ffcd67", boss: true, motion: "carrier", attack: "carrier", cadence: 1.55, bullet: "shell", bossTitle: "BULWARK CARRIER" },
     tempest: { hp: 1750, r: 70, speed: 92, score: 5600, color: "#90dfff", boss: true, motion: "tempest", attack: "tempest", cadence: 1.32, bullet: "spark", bossTitle: "TEMPEST FORTRESS" },
     dreadnought: { hp: 2200, r: 78, speed: 84, score: 7000, color: "#ff8c62", boss: true, motion: "dreadnought", attack: "dreadnought", cadence: 1.28, bullet: "shell", bossTitle: "FOUNDRY DREADNOUGHT" },
@@ -84,7 +98,7 @@
       theme: "harbor",
       difficulty: 1,
       waves: [
-        { label: "PATROL V", groups: [{ type: "scout", formation: "vee", count: 5 }, { type: "fighter", formation: "line", count: 3, gap: 0.55 }] },
+        { label: "PATROL V", groups: [{ type: "bulwark", formation: "line", count: 1, squad: "aegis" }, { type: "scout", formation: "vee", count: 5, squad: "aegis" }, { type: "fighter", formation: "line", count: 3, gap: 0.55, squad: "aegis" }] },
         { label: "DOCKLINE", groups: [{ type: "scout", formation: "stagger", count: 6 }, { type: "fighter", formation: "flank", count: 4, gap: 0.62 }] },
         { label: "BREAKWATER", groups: [{ type: "fighter", formation: "arc", count: 5 }, { type: "scout", formation: "vee", count: 5, gap: 0.58 }] },
       ],
@@ -99,8 +113,8 @@
       theme: "storm",
       difficulty: 1.28,
       waves: [
-        { label: "SQUALL RUN", groups: [{ type: "skimmer", formation: "stagger", count: 6 }, { type: "scout", formation: "flank", count: 4, gap: 0.46 }] },
-        { label: "CLOUD SPEAR", groups: [{ type: "striker", formation: "vee", count: 4 }, { type: "skimmer", formation: "arc", count: 6, gap: 0.66 }] },
+        { label: "SQUALL RUN", groups: [{ type: "jammer", formation: "line", count: 1, squad: "blackout" }, { type: "skimmer", formation: "stagger", count: 6, squad: "blackout" }, { type: "scout", formation: "flank", count: 4, gap: 0.46, squad: "blackout" }] },
+        { label: "CLOUD SPEAR", groups: [{ type: "phantom", formation: "vee", count: 3 }, { type: "striker", formation: "vee", count: 4 }, { type: "skimmer", formation: "arc", count: 6, gap: 0.66 }] },
         { label: "DOWNDRAFT", groups: [{ type: "striker", formation: "line", count: 5 }, { type: "skimmer", formation: "flank", count: 6, gap: 0.58 }] },
       ],
       boss: "tempest",
@@ -114,8 +128,8 @@
       theme: "forge",
       difficulty: 1.62,
       waves: [
-        { label: "ASH WING", groups: [{ type: "bomber", formation: "line", count: 3 }, { type: "turret", formation: "flank", count: 4, gap: 0.72 }] },
-        { label: "MOLTEN LOCK", groups: [{ type: "bomber", formation: "vee", count: 5 }, { type: "fighter", formation: "stagger", count: 5, gap: 0.58 }] },
+        { label: "ASH WING", groups: [{ type: "mender", formation: "line", count: 1, squad: "forge" }, { type: "bomber", formation: "line", count: 3, squad: "forge" }, { type: "turret", formation: "flank", count: 4, gap: 0.72, squad: "forge" }] },
+        { label: "MOLTEN LOCK", groups: [{ type: "commander", formation: "line", count: 1, squad: "forge-2" }, { type: "bomber", formation: "vee", count: 5, squad: "forge-2" }, { type: "fighter", formation: "stagger", count: 5, gap: 0.58, squad: "forge-2" }] },
         { label: "PRESSURE GATE", groups: [{ type: "turret", formation: "arc", count: 5 }, { type: "bomber", formation: "flank", count: 4, gap: 0.68 }] },
       ],
       boss: "dreadnought",
@@ -129,8 +143,8 @@
       theme: "rift",
       difficulty: 2.04,
       waves: [
-        { label: "GATEKEEPERS", groups: [{ type: "wraith", formation: "arc", count: 6 }, { type: "prism", formation: "line", count: 3, gap: 0.68 }] },
-        { label: "FRACTURE", groups: [{ type: "wraith", formation: "flank", count: 7 }, { type: "striker", formation: "vee", count: 5, gap: 0.58 }] },
+        { label: "GATEKEEPERS", groups: [{ type: "bulwark", formation: "line", count: 1, squad: "gate" }, { type: "jammer", formation: "line", count: 1, squad: "gate" }, { type: "wraith", formation: "arc", count: 6, squad: "gate" }, { type: "prism", formation: "line", count: 3, gap: 0.68, squad: "gate" }] },
+        { label: "FRACTURE", groups: [{ type: "phantom", formation: "flank", count: 4 }, { type: "rammer", formation: "vee", count: 4, gap: 0.4 }, { type: "wraith", formation: "flank", count: 7 }, { type: "striker", formation: "vee", count: 5, gap: 0.58 }] },
         { label: "LAST VECTOR", groups: [{ type: "prism", formation: "stagger", count: 5 }, { type: "wraith", formation: "vee", count: 7, gap: 0.62 }] },
       ],
       boss: "core",
@@ -155,6 +169,19 @@
     arsenal: { name: "ARSENAL LINK", detail: "INCREASED WEAPON CYCLING", color: "#ff9b69" },
     magnet: { name: "SALVAGE MAGNET", detail: "ATTRACTS PICKUPS AND LOCKS CORES", color: "#9cf0d9" },
     phase: { name: "PHASE VEIL", detail: "GRAZES GRANT A PHASE WINDOW", color: "#d4a7ff" },
+  };
+
+  const wingmanDefs = {
+    guardian: { name: "ROOK", role: "AEGIS INTERCEPTOR", color: "#7de9ff", cooldown: 1.35, icon: "R" },
+    striker: { name: "LANCER", role: "MISSILE WING", color: "#ffb36d", cooldown: 1.08, icon: "L" },
+    medic: { name: "MENDER", role: "NANO SUPPORT", color: "#8ff0b0", cooldown: 6.2, icon: "M" },
+  };
+
+  const rescueRoleByEnemy = {
+    bulwark: "guardian",
+    jammer: "striker",
+    commander: "striker",
+    mender: "medic",
   };
 
   const routeDefs = {
@@ -239,6 +266,7 @@
     signalFragments: 0,
     missionSuccesses: 0,
     bossPartsDestroyed: 0,
+    jamStrength: 0,
     module: "none",
     moduleCooldown: 0,
     routeModifier: { pressure: 0, score: 1 },
@@ -251,7 +279,11 @@
     pickups: [],
     particles: [],
     rings: [],
+    arcs: [],
     floating: [],
+    wingmanRoster: [],
+    wingman: null,
+    rescueDropLevel: 0,
     player: null,
     audio: null,
     muted: false,
@@ -283,6 +315,53 @@
     return currentLevelDef().difficulty + currentCycle() * cycleStep + (state.routeModifier?.pressure || 0);
   }
   function levelLabel() { return `LEVEL ${String(state.level).padStart(2, "0")}`; }
+
+  function tacticalSourceFor(enemy, role, range) {
+    return state.enemies.find((candidate) => {
+      if (candidate === enemy || candidate.dead || candidate.boss) return false;
+      const def = enemyDefs[candidate.type];
+      return def.supportRole === role && distance(candidate, enemy) <= (range || def.supportRange || 160);
+    }) || null;
+  }
+
+  function emitArc(from, to, color, life = 0.18, width = 2) {
+    state.arcs.push({ from: { x: from.x, y: from.y }, to: { x: to.x, y: to.y }, color, life, maxLife: life, width, jitter: random(-8, 8) });
+  }
+
+  function deployWingman(role, announce = true) {
+    const def = wingmanDefs[role];
+    if (!def || !state.player) return;
+    state.wingman = {
+      role,
+      x: state.player.x + (role === "guardian" ? -54 : 54),
+      y: state.player.y + 16,
+      age: 0,
+      cooldown: 0.35,
+      pulse: 0,
+      tilt: 0,
+    };
+    if (announce) {
+      setAlert(`WINGMAN LINK // ${def.name}`, "bright", 1.1);
+      state.floating.push({ x: state.player.x, y: state.player.y - 46, text: `${def.name} ONLINE`, color: def.color, life: 1.15, maxLife: 1.15 });
+      tone("wingman");
+    }
+    syncUi();
+  }
+
+  function unlockWingman(role) {
+    if (!wingmanDefs[role] || state.wingmanRoster.includes(role)) return;
+    state.wingmanRoster.push(role);
+    deployWingman(role);
+    const def = wingmanDefs[role];
+    state.floating.push({ x: W / 2, y: 235, text: `RESCUE LINK // ${def.name}`, color: def.color, life: 1.8, maxLife: 1.8 });
+  }
+
+  function cycleWingman() {
+    if (!state.running || state.paused || state.routeOpen || state.wingmanRoster.length < 2) return;
+    const current = state.wingman?.role;
+    const index = Math.max(0, state.wingmanRoster.indexOf(current));
+    deployWingman(state.wingmanRoster[(index + 1) % state.wingmanRoster.length]);
+  }
 
   function addOverdrive(amount) {
     if (!state.running || !state.player) return;
@@ -471,6 +550,7 @@
     state.signalFragments = 0;
     state.missionSuccesses = 0;
     state.bossPartsDestroyed = 0;
+    state.jamStrength = 0;
     state.module = "none";
     state.moduleCooldown = 0;
     state.routeModifier = { pressure: 0, score: 1 };
@@ -487,7 +567,11 @@
     state.pickups = [];
     state.particles = [];
     state.rings = [];
+    state.arcs = [];
     state.floating = [];
+    state.wingmanRoster = [];
+    state.wingman = null;
+    state.rescueDropLevel = 0;
     state.player = makePlayer();
     state.running = true;
     state.paused = false;
@@ -667,9 +751,10 @@
       if (groupIndex > 0) cursor += group.gap || 0.78;
       const interval = group.interval || 0.12;
       const groupPhase = random(0, TAU);
+      const squadId = `${state.level}-${state.waveIndex + 1}-${group.squad || groupIndex}`;
       formationSlots(group.formation, group.count).forEach((slot, index) => {
         const elite = currentCycle() > 0 && index < Math.min(currentCycle(), 2) && (groupIndex + index) % 2 === 0;
-        queue.push({ at: cursor + index * interval, type: group.type, phase: groupPhase, elite, ...slot });
+        queue.push({ at: cursor + index * interval, type: group.type, phase: groupPhase, squadId, elite, ...slot });
       });
       cursor += group.count * interval;
     });
@@ -847,6 +932,14 @@
       elite: Boolean(options.elite),
       missionTarget,
       secret: Boolean(options.secret),
+      squadId: options.squadId || "solo",
+      supportRole: def.supportRole || "",
+      supportRange: def.supportRange || 0,
+      stealth: Boolean(def.stealth),
+      cloaked: false,
+      repairCooldown: random(0.9, 1.6),
+      shieldFlash: 0,
+      supportFlash: 0,
       bossTitle: def.bossTitle || "",
       phase: options.phase ?? random(0, TAU),
       age: 0,
@@ -864,11 +957,11 @@
     return enemy;
   }
 
-  function spawnPickup(x, y, kind, weapon) {
+  function spawnPickup(x, y, kind, weapon, options = {}) {
     const roll = Math.random();
     const actualKind = kind || (roll < 0.55 ? "armory" : roll < 0.74 ? "upgrade" : roll < 0.88 ? "bomb" : "repair");
     let selectedWeapon = weapon;
-    if (!selectedWeapon) {
+    if (!selectedWeapon && (actualKind === "weapon" || actualKind === "armory")) {
       const alternatives = state.player ? weaponKeys.filter((key) => key !== state.player.weapon) : weaponKeys;
       selectedWeapon = state.player && Math.random() < 0.34 ? state.player.weapon : choose(alternatives.length ? alternatives : weaponKeys);
     }
@@ -878,10 +971,11 @@
       kind: actualKind,
       weapon: selectedWeapon,
       weaponIndex: Math.max(0, weaponKeys.indexOf(selectedWeapon)),
-      r: actualKind === "armory" ? 22 : 18,
-      life: actualKind === "armory" ? 15 : 12,
+      pilotRole: options.pilotRole || "",
+      r: actualKind === "armory" ? 22 : actualKind === "rescue" ? 21 : 18,
+      life: actualKind === "armory" || actualKind === "rescue" ? 15 : 12,
       spin: random(0, TAU),
-      vy: actualKind === "armory" ? random(36, 48) : random(50, 74),
+      vy: actualKind === "armory" || actualKind === "rescue" ? random(36, 48) : random(50, 74),
       hitPulse: 0,
       cycleCharge: 0,
       dead: false,
@@ -891,6 +985,7 @@
   function fireEnemy(enemy) {
     if (!state.player || enemy.y < 20) return;
     const def = enemyDefs[enemy.type];
+    if (def.attack === "ram") return;
     const bulletCap = Math.min(92, 24 + state.level * 12);
     if (state.enemyBullets.length >= bulletCap) return;
     const escortTarget = state.mission?.type === "escort" && !state.mission.resolved && state.ally && !state.ally.dead && Math.random() < 0.28;
@@ -934,6 +1029,14 @@
     if (def.attack === "cross") {
       [-0.32, 0, 0.32].forEach((offset) => aimed(offset, 224, 12, { r: 5, style: "orb", curve: offset * 0.45 }));
       create(Math.PI / 2, 178, 10, { r: 4, color: "#8ff3dc", style: "spark" });
+    }
+    if (def.attack === "command") {
+      [-0.24, 0, 0.24].forEach((offset) => aimed(offset, 206, 12, { r: 5, color: "#ffe19a", style: "shard" }));
+      radial(5, 132, 8, enemy.age * 0.55, { r: 4, color: "#ffd665", style: "spark" });
+    }
+    if (def.attack === "jam") {
+      [-0.22, 0, 0.22].forEach((offset) => aimed(offset, 210, 11, { r: 5, color: "#efabff", style: "orb", curve: offset * 0.7 }));
+      radial(5, 126, 7, -enemy.age * 0.8, { r: 4, color: "#d8a4ff", style: "spark", curve: 0.12 });
     }
     if (def.attack === "radial") radial(7, 172, 10, enemy.age * 0.7, { r: 5, style: "orb" });
     if (def.attack === "carrier") {
@@ -1033,12 +1136,211 @@
       const lanes = level === 1 ? [-13, 13] : level === 2 ? [-20, 0, 20] : [-27, -9, 9, 27];
       lanes.forEach((lane) => add(player.x + lane, player.y - 15, lane * 2.4, -265, { damage: 22 + level * 5, r: 6, pierce: 1, homing: true, life: 3.5, turnRate: 3.5 }));
     }
+    if (player.weapon === "arc") {
+      const lanes = level === 1 ? [-9, 9] : level === 2 ? [-15, 15] : [-20, 0, 20];
+      lanes.forEach((lane) => add(player.x + lane, player.y - 25, lane * 1.2, -525, {
+        damage: 19 + level * 5,
+        r: 4.5,
+        pierce: 1,
+        chain: true,
+        chainCount: 1 + level,
+        chainRange: 92 + level * 16,
+        life: 1.9,
+      }));
+    }
+    if (player.weapon === "gravity") {
+      const lanes = level === 1 ? [0] : level === 2 ? [-16, 16] : [-22, 0, 22];
+      lanes.forEach((lane) => add(player.x + lane, player.y - 30, lane * 0.7, -330, {
+        damage: 38 + level * 10,
+        r: 10 + level,
+        pierce: 1,
+        gravity: true,
+        gravityRadius: 92 + level * 16,
+        gravityForce: 72 + level * 18,
+        life: 2.2,
+      }));
+    }
+    if (player.weapon === "blade") {
+      const lanes = level === 1 ? [-17, 17] : level === 2 ? [-24, 0, 24] : [-31, -10, 10, 31];
+      lanes.forEach((lane) => add(player.x + lane, player.y - 23, lane * 1.6, -480, {
+        damage: 24 + level * 6,
+        r: 8,
+        pierce: 4 + level * 2,
+        blade: true,
+        returnAfter: 0.68 + Math.abs(lane) * 0.001,
+        life: 3.2,
+      }));
+    }
     tone(player.weapon === "rail" ? "rail" : "shoot", player.weapon === "laser" ? 0.018 : 0.026);
   }
 
   function explodePlasma(bullet) {
     state.rings.push({ x: bullet.x, y: bullet.y, r: 5, max: 72, life: 0.34, maxLife: 0.34, color: bullet.color, damage: bullet.damage * 0.52, hits: new Set() });
     burst(bullet.x, bullet.y, bullet.color, 13, 145, 0.46);
+  }
+
+  function triggerChainLightning(bullet, firstTarget) {
+    if (!bullet.chain || bullet.chained || !firstTarget) return;
+    bullet.chained = true;
+    const visited = new Set([firstTarget]);
+    let current = firstTarget;
+    for (let hop = 0; hop < bullet.chainCount; hop += 1) {
+      const candidates = state.enemies
+        .filter((enemy) => !enemy.dead && !visited.has(enemy) && distance(current, enemy) <= bullet.chainRange)
+        .sort((a, b) => {
+          const roleBiasA = enemyDefs[a.type].supportRole ? -34 : 0;
+          const roleBiasB = enemyDefs[b.type].supportRole ? -34 : 0;
+          return distance(current, a) + roleBiasA - distance(current, b) - roleBiasB;
+        });
+      const next = candidates[0];
+      if (!next) break;
+      const damageScale = Math.max(0.42, 0.76 - hop * 0.1);
+      emitArc(current, next, bullet.color, 0.2, 3 - hop * 0.35);
+      visited.add(next);
+      damageEnemy(next, bullet.damage * damageScale);
+      current = next;
+    }
+  }
+
+  function collapseGravityBullet(bullet) {
+    if (bullet.collapsed) return;
+    bullet.collapsed = true;
+    bullet.dead = true;
+    const radius = bullet.gravityRadius || 110;
+    state.rings.push({ x: bullet.x, y: bullet.y, r: 6, max: radius, life: 0.44, maxLife: 0.44, color: bullet.color, damage: bullet.damage * 0.66, hits: new Set() });
+    let captured = 0;
+    for (const hostile of state.enemyBullets) {
+      if (!hostile.dead && distance(bullet, hostile) < radius * 0.82) {
+        hostile.dead = true;
+        captured += 1;
+      }
+    }
+    if (captured) addOverdrive(Math.min(12, captured * 0.7));
+    burst(bullet.x, bullet.y, bullet.color, 22 + Math.min(18, captured), 185, 0.58);
+    state.shake = Math.max(state.shake, 4.5);
+    tone("gravity", 0.04);
+  }
+
+  function updateGravityBullet(bullet, dt) {
+    const radius = bullet.gravityRadius || 110;
+    for (const enemy of state.enemies) {
+      if (enemy.dead) continue;
+      const dx = bullet.x - enemy.x;
+      const dy = bullet.y - enemy.y;
+      const d = Math.hypot(dx, dy);
+      if (d <= 1 || d > radius) continue;
+      const force = (1 - d / radius) * bullet.gravityForce * (enemy.boss ? 0.08 : 1);
+      const pullX = dx / d * force * dt;
+      enemy.x += pullX;
+      enemy.y += dy / d * force * dt;
+      if (!enemy.boss && Number.isFinite(enemy.baseX)) enemy.baseX = clamp(enemy.baseX + pullX, 26, W - 26);
+    }
+    for (const hostile of state.enemyBullets) {
+      if (hostile.dead) continue;
+      const dx = bullet.x - hostile.x;
+      const dy = bullet.y - hostile.y;
+      const d = Math.hypot(dx, dy);
+      if (d <= 1 || d > radius * 1.08) continue;
+      const force = (1 - d / (radius * 1.08)) * bullet.gravityForce * 2.2;
+      hostile.vx += dx / d * force * dt;
+      hostile.vy += dy / d * force * dt;
+      if (d < bullet.r + hostile.r + 6) hostile.dead = true;
+    }
+  }
+
+  function updateBladeBullet(bullet, dt) {
+    const player = state.player;
+    if (!player) return;
+    if (!bullet.returning && (bullet.age >= bullet.returnAfter || bullet.y < 92)) {
+      bullet.returning = true;
+      bullet.hitIds = new Set();
+      bullet.hits = 0;
+    }
+    if (!bullet.returning) return;
+    const desired = Math.atan2(player.y - bullet.y, player.x - bullet.x);
+    const current = Math.atan2(bullet.vy, bullet.vx);
+    let turn = (desired - current + Math.PI * 3) % TAU - Math.PI;
+    turn = clamp(turn, -6.2 * dt, 6.2 * dt);
+    const speed = Math.min(620, Math.hypot(bullet.vx, bullet.vy) + 190 * dt);
+    bullet.vx = Math.cos(current + turn) * speed;
+    bullet.vy = Math.sin(current + turn) * speed;
+    if (distance(bullet, player) < player.r + 12 && bullet.age > bullet.returnAfter + 0.16) bullet.dead = true;
+  }
+
+  function fireWingmanMissile(wingman, target) {
+    const def = wingmanDefs[wingman.role];
+    const level = state.player?.weaponLevel || 1;
+    const angle = Math.atan2(target.y - wingman.y, target.x - wingman.x);
+    state.bullets.push({
+      x: wingman.x,
+      y: wingman.y - 12,
+      vx: Math.cos(angle) * 285,
+      vy: Math.sin(angle) * 285,
+      r: 5,
+      damage: 17 + level * 5,
+      color: def.color,
+      life: 3.2,
+      pierce: 1,
+      hits: 0,
+      type: "wingman",
+      homing: true,
+      turnRate: 4.8,
+      dead: false,
+    });
+    tone("wingman-shot", 0.018);
+  }
+
+  function updateWingman(dt) {
+    const wingman = state.wingman;
+    const player = state.player;
+    if (!wingman || !player) return;
+    const def = wingmanDefs[wingman.role];
+    wingman.age += dt;
+    wingman.cooldown = Math.max(0, wingman.cooldown - dt);
+    wingman.pulse = Math.max(0, wingman.pulse - dt);
+    const rosterIndex = Math.max(0, state.wingmanRoster.indexOf(wingman.role));
+    const side = rosterIndex % 2 === 0 ? -1 : 1;
+    const targetX = clamp(player.x + side * (53 + Math.sin(wingman.age * 1.7) * 5), 28, W - 28);
+    const targetY = clamp(player.y + 24 + Math.cos(wingman.age * 2.1) * 7, 140, H - 42);
+    const oldX = wingman.x;
+    wingman.x += (targetX - wingman.x) * Math.min(1, dt * 7.5);
+    wingman.y += (targetY - wingman.y) * Math.min(1, dt * 7.5);
+    wingman.tilt += (clamp((wingman.x - oldX) / 8, -0.45, 0.45) - wingman.tilt) * Math.min(1, dt * 12);
+
+    if (wingman.role === "striker" && wingman.cooldown <= 0) {
+      const target = state.enemies
+        .filter((enemy) => !enemy.dead && enemy.y > 20)
+        .sort((a, b) => distance(wingman, a) - distance(wingman, b))[0];
+      if (target) {
+        fireWingmanMissile(wingman, target);
+        wingman.cooldown = def.cooldown;
+        wingman.pulse = 0.18;
+      }
+    }
+    if (wingman.role === "guardian" && wingman.cooldown <= 0) {
+      const threat = state.enemyBullets
+        .filter((bullet) => !bullet.dead && distance(player, bullet) < 118)
+        .sort((a, b) => distance(player, a) - distance(player, b))[0];
+      if (threat) {
+        threat.dead = true;
+        wingman.cooldown = def.cooldown;
+        wingman.pulse = 0.34;
+        emitArc(wingman, threat, def.color, 0.22, 3);
+        state.rings.push({ x: threat.x, y: threat.y, r: 3, max: 34, life: 0.24, maxLife: 0.24, color: def.color, damage: 0, hits: new Set() });
+        addOverdrive(1.1);
+        tone("shield", 0.025);
+      }
+    }
+    if (wingman.role === "medic" && wingman.cooldown <= 0 && player.hp < 100) {
+      const repair = 5 + player.weaponLevel * 2;
+      player.hp = Math.min(100, player.hp + repair);
+      wingman.cooldown = def.cooldown;
+      wingman.pulse = 0.55;
+      emitArc(wingman, player, def.color, 0.4, 3);
+      state.rings.push({ x: player.x, y: player.y, r: 8, max: 48, life: 0.42, maxLife: 0.42, color: def.color, damage: 0, hits: new Set() });
+      state.floating.push({ x: player.x, y: player.y - 38, text: `NANO REPAIR +${repair}`, color: def.color, life: 0.9, maxLife: 0.9 });
+      tone("pickup", 0.03);
+    }
   }
 
   function triggerSpecial() {
@@ -1228,7 +1530,8 @@
     player.fireCooldown -= dt;
     const overdriveRate = state.overdrive > 0 ? 0.64 : 1;
     const moduleRate = state.module === "arsenal" ? 0.88 : 1;
-    const fireRate = weaponDefs[player.weapon].rate * (1 - (player.weaponLevel - 1) * 0.07) * overdriveRate * moduleRate;
+    const jammerPenalty = 1 + state.jamStrength * 0.56;
+    const fireRate = weaponDefs[player.weapon].rate * (1 - (player.weaponLevel - 1) * 0.07) * overdriveRate * moduleRate * jammerPenalty;
     while (player.fireCooldown <= 0) {
       fireWeapon();
       player.fireCooldown += fireRate;
@@ -1236,11 +1539,35 @@
   }
 
   function updateEnemies(dt) {
+    state.jamStrength = 0;
     for (const enemy of state.enemies) {
       const def = enemyDefs[enemy.type];
       enemy.age += dt;
       enemy.damaged = Math.max(0, enemy.damaged - dt);
+      enemy.shieldFlash = Math.max(0, enemy.shieldFlash - dt);
+      enemy.supportFlash = Math.max(0, enemy.supportFlash - dt);
       enemy.parts?.forEach((part) => { part.damaged = Math.max(0, part.damaged - dt); });
+      enemy.cloaked = Boolean(def.stealth && enemy.damaged <= 0 && Math.sin(enemy.age * 1.75 + enemy.phase) > -0.18);
+      if (def.supportRole === "jammer" && state.player && distance(enemy, state.player) < def.supportRange) {
+        state.jamStrength = Math.max(state.jamStrength, 1 - distance(enemy, state.player) / def.supportRange);
+      }
+      if (def.supportRole === "repair") {
+        enemy.repairCooldown -= dt;
+        if (enemy.repairCooldown <= 0 && enemy.y > 25) {
+          const target = state.enemies
+            .filter((candidate) => !candidate.dead && candidate !== enemy && !candidate.boss && candidate.hp < candidate.maxHp && distance(enemy, candidate) < def.supportRange)
+            .sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+          if (target) {
+            const amount = 10 + currentDifficulty() * 3;
+            target.hp = Math.min(target.maxHp, target.hp + amount);
+            enemy.supportFlash = 0.3;
+            emitArc(enemy, target, def.color, 0.34, 2.4);
+            state.floating.push({ x: target.x, y: target.y - target.r - 10, text: `REPAIR +${Math.round(amount)}`, color: def.color, life: 0.62, maxLife: 0.62 });
+            tone("repair", 0.018);
+          }
+          enemy.repairCooldown = 1.6 + random(0.25, 0.8);
+        }
+      }
       if (enemy.boss) {
         refreshBossStage(enemy);
         if (enemy.y < enemy.targetY) enemy.y = Math.min(enemy.targetY, enemy.y + enemy.speed * dt);
@@ -1257,8 +1584,15 @@
         if (def.motion === "anchor") enemy.x = enemy.baseX + Math.sin(enemy.age * 0.92 + enemy.phase) * 46;
         if (def.motion === "phase") enemy.x = enemy.baseX + Math.sin(enemy.age * 2.65 + enemy.phase) * 96 + Math.sin(enemy.age * 6.2) * 18;
         if (def.motion === "orbit") enemy.x = enemy.baseX + Math.sin(enemy.age * 1.85 + enemy.phase) * 102;
+        if (def.motion === "ram") {
+          const target = state.player || { x: W / 2, y: H };
+          const steer = clamp((target.x - enemy.x) / 120, -1, 1);
+          enemy.x += steer * enemy.speed * 0.82 * dt;
+          enemy.y += enemy.speed * (enemy.age > 0.8 ? 1.22 : 0.72) * dt;
+        } else {
+          enemy.y += enemy.speed * dt;
+        }
         enemy.x = clamp(enemy.x, 26, W - 26);
-        enemy.y += enemy.speed * dt;
       }
       enemy.shoot -= dt;
       if (enemy.shoot <= 0 && enemy.y > 40 && enemy.y < H - 110) {
@@ -1266,7 +1600,8 @@
         const pressure = clamp(1.08 - (state.level - 1) * 0.035, 0.76, 1.08);
         const stageRate = enemy.boss ? 1 - (enemy.stage - 1) * 0.12 : 1;
         const destroyedGuns = enemy.boss ? (enemy.parts || []).filter((part) => part.role === "gun" && part.dead).length : 0;
-        enemy.shoot += def.cadence * pressure * stageRate * (1 + destroyedGuns * 0.1) * random(0.9, 1.12);
+        const commander = tacticalSourceFor(enemy, "command", 205);
+        enemy.shoot += def.cadence * pressure * stageRate * (commander ? 0.73 : 1) * (1 + destroyedGuns * 0.1) * random(0.9, 1.12);
       }
       if (!enemy.boss && (enemy.y > H + 115 || enemy.x < -120 || enemy.x > W + 120)) {
         enemy.dead = true;
@@ -1321,11 +1656,15 @@
   function updateBullets(dt) {
     for (const bullet of state.bullets) {
       bullet.life -= dt;
+      bullet.age = (bullet.age || 0) + dt;
+      if (bullet.gravity) updateGravityBullet(bullet, dt);
+      if (bullet.blade) updateBladeBullet(bullet, dt);
+      if (bullet.dead) continue;
       if (bullet.homing) {
         let nearest = null;
         let nearestDistance = Infinity;
         for (const enemy of state.enemies) {
-          if (enemy.dead) continue;
+          if (enemy.dead || enemy.cloaked) continue;
           const d = distance(bullet, enemy);
           if (d < nearestDistance) { nearestDistance = d; nearest = enemy; }
         }
@@ -1341,7 +1680,9 @@
       }
       bullet.x += bullet.vx * dt;
       bullet.y += bullet.vy * dt;
-      if (bullet.life <= 0 || bullet.y < -100 || bullet.x < -100 || bullet.x > W + 100) bullet.dead = true;
+      if (bullet.life <= 0 || bullet.y < -100 || bullet.x < -100 || bullet.x > W + 100) {
+        if (bullet.gravity) collapseGravityBullet(bullet); else bullet.dead = true;
+      }
       if (bullet.dead) continue;
       for (const pickup of state.pickups) {
         if (!pickup.dead && pickup.kind === "armory") hitArmoryCore(bullet, pickup);
@@ -1359,7 +1700,9 @@
             bullet.hitIds.add(part);
             damageBossPart(enemy, part, bullet.damage);
             bullet.hits += 1;
-            if (bullet.plasma) { explodePlasma(bullet); bullet.dead = true; }
+            triggerChainLightning(bullet, enemy);
+            if (bullet.gravity) collapseGravityBullet(bullet);
+            else if (bullet.plasma) { explodePlasma(bullet); bullet.dead = true; }
             else if (bullet.hits >= bullet.pierce) bullet.dead = true;
             continue;
           }
@@ -1370,7 +1713,9 @@
           bullet.hitIds.add(enemy);
           damageEnemy(enemy, bullet.damage);
           bullet.hits += 1;
-          if (bullet.plasma) { explodePlasma(bullet); bullet.dead = true; }
+          triggerChainLightning(bullet, enemy);
+          if (bullet.gravity) collapseGravityBullet(bullet);
+          else if (bullet.plasma) { explodePlasma(bullet); bullet.dead = true; }
           else if (bullet.hits >= bullet.pierce) bullet.dead = true;
           else { burst(bullet.x, bullet.y, bullet.color, 3, 65, 0.18); }
         }
@@ -1441,6 +1786,15 @@
       pickup.spin += dt * 3.7;
       pickup.y += pickup.vy * dt;
       pickup.x += Math.sin(pickup.spin * 1.8) * 24 * dt;
+      if (pickup.kind === "rescue" && state.player) {
+        const d = distance(pickup, state.player);
+        if (d > 1) {
+          const pull = (72 + Math.max(0, 260 - d) * 0.28) * dt;
+          pickup.x += (state.player.x - pickup.x) / d * pull;
+          pickup.y += (state.player.y - pickup.y) / d * pull;
+          pickup.vy = Math.max(18, pickup.vy - dt * 12);
+        }
+      }
       pickup.hitPulse = Math.max(0, (pickup.hitPulse || 0) - dt);
       if (pickup.kind === "armory") {
         const threshold = state.module === "magnet" ? 0.76 : 1;
@@ -1469,7 +1823,14 @@
   function collectPickup(pickup) {
     const player = state.player;
     pickup.dead = true;
-    if (pickup.kind === "weapon" || pickup.kind === "armory") {
+    if (pickup.kind === "rescue") {
+      const role = pickup.pilotRole || "guardian";
+      const def = wingmanDefs[role];
+      unlockWingman(role);
+      setAlert(`PILOT RESCUED // ${def.name}`, "bright", 1.25);
+      burst(pickup.x, pickup.y, def.color, 26, 155, 0.62);
+      tone("rescue");
+    } else if (pickup.kind === "weapon" || pickup.kind === "armory") {
       const isDuplicate = player.weapon === pickup.weapon;
       if (isDuplicate) player.weaponLevel = Math.min(3, player.weaponLevel + 1);
       else player.weapon = pickup.weapon;
@@ -1503,6 +1864,17 @@
 
   function damageEnemy(enemy, amount, heavy = false) {
     if (enemy.dead || !state.running) return;
+    const shield = !heavy && !enemy.boss ? tacticalSourceFor(enemy, "shield", 178) : null;
+    if (shield) {
+      amount *= 0.42;
+      shield.shieldFlash = 0.16;
+      emitArc(shield, enemy, enemyDefs[shield.type].color, 0.1, 1.6);
+    }
+    if (enemy.cloaked) {
+      amount *= 0.68;
+      enemy.cloaked = false;
+      enemy.supportFlash = 0.22;
+    }
     if (enemy.boss && enemy.parts?.length) {
       const alive = aliveBossParts(enemy).length;
       const destroyedRatio = 1 - alive / enemy.parts.length;
@@ -1539,6 +1911,7 @@
     state.upgradeKillCounter += enemy.boss ? 5 : 1;
     let droppedWeapon = false;
     let droppedUpgrade = false;
+    let droppedRescue = false;
     if (state.weaponKillCounter >= state.nextWeaponDrop) {
       spawnPickup(enemy.x, enemy.y, "armory");
       state.weaponKillCounter = 0;
@@ -1551,12 +1924,18 @@
       state.nextUpgradeDrop = Math.floor(random(11, 16));
       droppedUpgrade = true;
     }
+    const rescueRole = rescueRoleByEnemy[enemy.type];
+    if (rescueRole && !state.wingmanRoster.includes(rescueRole) && state.rescueDropLevel !== state.level) {
+      spawnPickup(clamp(enemy.x + (droppedWeapon || droppedUpgrade ? 34 : 0), 30, W - 30), enemy.y, "rescue", null, { pilotRole: rescueRole });
+      state.rescueDropLevel = state.level;
+      droppedRescue = true;
+    }
     if (enemy.boss) {
       spawnPickup(clamp(enemy.x - 48, 30, W - 30), enemy.y + 18, "upgrade");
       spawnPickup(enemy.x, enemy.y + 18, "bomb");
       spawnPickup(clamp(enemy.x + 48, 30, W - 30), enemy.y + 18, "repair");
       completeLevel(enemy);
-    } else if (!droppedWeapon && !droppedUpgrade) {
+    } else if (!droppedWeapon && !droppedUpgrade && !droppedRescue) {
       const roll = Math.random();
       if (roll < 0.045) spawnPickup(enemy.x, enemy.y, "bomb");
       else if (roll < 0.07) spawnPickup(enemy.x, enemy.y, "repair");
@@ -1622,6 +2001,10 @@
       float.y -= 32 * dt;
       if (float.life <= 0) float.dead = true;
     }
+    for (const arc of state.arcs) {
+      arc.life -= dt;
+      if (arc.life <= 0) arc.dead = true;
+    }
   }
 
   function updateBackdrop(dt) {
@@ -1653,6 +2036,7 @@
       updateParticles(dt);
       state.particles = state.particles.filter((item) => !item.dead);
       state.floating = state.floating.filter((item) => !item.dead);
+      state.arcs = state.arcs.filter((item) => !item.dead);
       state.shake = Math.max(0, state.shake - dt * 24);
       state.flash = Math.max(0, state.flash - dt * 2.2);
       syncUi();
@@ -1675,6 +2059,7 @@
     if (state.routeOpen) return;
     updateEnvironment(dt);
     updatePlayer(dt);
+    updateWingman(dt);
     updateEnemies(dt);
     updateBullets(dt);
     updateRings(dt);
@@ -1686,6 +2071,7 @@
     state.pickups = state.pickups.filter((item) => !item.dead);
     state.particles = state.particles.filter((item) => !item.dead);
     state.rings = state.rings.filter((item) => !item.dead);
+    state.arcs = state.arcs.filter((item) => !item.dead);
     state.floating = state.floating.filter((item) => !item.dead);
     state.alertTimer -= dt;
     if (state.alertTimer <= 0) clearAlert();
@@ -1994,6 +2380,48 @@
     ctx.closePath();
   }
 
+  function drawWingman() {
+    const wingman = state.wingman;
+    if (!wingman) return;
+    const def = wingmanDefs[wingman.role];
+    ctx.save();
+    ctx.translate(wingman.x, wingman.y);
+    ctx.rotate(wingman.tilt);
+    ctx.shadowBlur = wingman.pulse > 0 ? 18 : 7;
+    ctx.shadowColor = def.color;
+    if (wingman.pulse > 0) {
+      ctx.globalAlpha = 0.28 + wingman.pulse;
+      ctx.strokeStyle = def.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 25 + wingman.pulse * 20, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = "rgba(255, 214, 101, 0.34)";
+    ctx.beginPath(); ctx.moveTo(-4, 12); ctx.lineTo(0, 27 + Math.sin(wingman.age * 18) * 4); ctx.lineTo(4, 12); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = def.color;
+    shipPath(0.56);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(247, 255, 245, 0.8)";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = "#132b2c";
+    ctx.beginPath(); ctx.moveTo(0, -11); ctx.lineTo(4, 1); ctx.lineTo(0, 8); ctx.lineTo(-4, 1); ctx.closePath(); ctx.fill();
+    if (wingman.role === "guardian") {
+      ctx.strokeStyle = def.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 1, 18, -2.65, -0.5); ctx.stroke();
+    } else if (wingman.role === "medic") {
+      ctx.fillStyle = "#e9fff0";
+      ctx.fillRect(-5, -1, 10, 3);
+      ctx.fillRect(-1.5, -4.5, 3, 10);
+    } else {
+      ctx.fillStyle = "#fff0cc";
+      ctx.fillRect(-15, 4, 5, 8);
+      ctx.fillRect(10, 4, 5, 8);
+    }
+    ctx.restore();
+  }
+
   function drawPlayer() {
     const p = state.player;
     if (!p) return;
@@ -2047,10 +2475,98 @@
     ctx.restore();
   }
 
+  function drawTacticalLinks() {
+    for (const source of state.enemies) {
+      if (source.dead || source.boss || !source.supportRole) continue;
+      const def = enemyDefs[source.type];
+      const range = source.supportRange || def.supportRange;
+      const isJammer = source.supportRole === "jammer";
+      ctx.save();
+      ctx.globalAlpha = 0.14 + (source.supportFlash > 0 || source.shieldFlash > 0 ? 0.2 : 0);
+      ctx.strokeStyle = def.color;
+      ctx.lineWidth = source.supportRole === "shield" ? 2 : 1.2;
+      ctx.setLineDash(source.supportRole === "command" ? [10, 7] : [5, 8]);
+      ctx.beginPath();
+      ctx.arc(source.x, source.y, range, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (!isJammer) {
+        const targets = state.enemies
+          .filter((enemy) => {
+            if (enemy === source || enemy.dead || enemy.boss || distance(source, enemy) > range) return false;
+            if (source.supportRole === "repair") return enemy.hp < enemy.maxHp;
+            return true;
+          })
+          .sort((a, b) => distance(source, a) - distance(source, b))
+          .slice(0, 5);
+        ctx.globalAlpha = 0.26;
+        for (const target of targets) {
+          ctx.beginPath(); ctx.moveTo(source.x, source.y); ctx.lineTo(target.x, target.y); ctx.stroke();
+        }
+      } else if (state.player && distance(source, state.player) < range) {
+        ctx.globalAlpha = 0.22 + state.jamStrength * 0.18;
+        ctx.beginPath(); ctx.moveTo(source.x, source.y); ctx.lineTo(state.player.x, state.player.y); ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = def.color;
+      ctx.font = "900 7px 'Avenir Next Condensed', sans-serif";
+      ctx.textAlign = "center";
+      ctx.globalAlpha = 0.8;
+      ctx.fillText(source.supportRole.toUpperCase(), source.x, source.y - source.r - 17);
+      ctx.restore();
+    }
+  }
+
+  function drawArcs() {
+    for (const arc of state.arcs) {
+      const alpha = Math.max(0, arc.life / arc.maxLife);
+      const dx = arc.to.x - arc.from.x;
+      const dy = arc.to.y - arc.from.y;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = arc.color;
+      ctx.lineWidth = Math.max(0.8, arc.width * alpha);
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = arc.color;
+      ctx.beginPath();
+      ctx.moveTo(arc.from.x, arc.from.y);
+      for (let step = 1; step < 5; step += 1) {
+        const t = step / 5;
+        const normalX = -dy / Math.max(1, Math.hypot(dx, dy));
+        const normalY = dx / Math.max(1, Math.hypot(dx, dy));
+        const offset = Math.sin(step * 8.7 + arc.jitter) * arc.jitter * alpha;
+        ctx.lineTo(arc.from.x + dx * t + normalX * offset, arc.from.y + dy * t + normalY * offset);
+      }
+      ctx.lineTo(arc.to.x, arc.to.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawJammerInterference() {
+    if (state.jamStrength <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = state.jamStrength * 0.22;
+    ctx.fillStyle = "#ee9cff";
+    for (let index = 0; index < 7; index += 1) {
+      const y = (state.backdropTime * 170 + index * 149) % H;
+      const width = 70 + (index * 47 % 180);
+      ctx.fillRect((index * 83 + state.backdropTime * 23) % W - 40, y, width, 1.5);
+    }
+    ctx.strokeStyle = "#ee9cff";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(3, 3, W - 6, H - 6);
+    ctx.restore();
+  }
+
   function drawEnemy(enemy) {
     ctx.save();
     ctx.translate(enemy.x, enemy.y);
     const tint = enemy.damaged > 0 ? "#fff7dc" : enemy.color;
+    if (enemy.cloaked) ctx.globalAlpha = 0.22 + Math.sin(enemy.age * 7) * 0.08;
     if (enemy.elite) {
       ctx.save();
       ctx.rotate(-enemy.age * 0.9);
@@ -2154,6 +2670,82 @@
       ctx.rotate(-enemy.age * 0.7);
       ctx.fillStyle = "#173c3d";
       ctx.beginPath(); ctx.arc(0, 0, 10, 0, TAU); ctx.fill();
+    } else if (enemy.type === "bulwark") {
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, -31); ctx.lineTo(25, -16); ctx.lineTo(34, 13); ctx.lineTo(16, 29); ctx.lineTo(0, 18); ctx.lineTo(-16, 29); ctx.lineTo(-34, 13); ctx.lineTo(-25, -16); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#d8fff8";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#153f3d";
+      ctx.beginPath(); ctx.arc(0, 1, 12, 0, TAU); ctx.fill();
+      ctx.strokeStyle = enemy.shieldFlash > 0 ? "#ffffff" : "#7ffff0";
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(0, 1, 19, -2.8, -0.34); ctx.stroke();
+    } else if (enemy.type === "mender") {
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, -29); ctx.lineTo(12, -9); ctx.lineTo(31, -15); ctx.lineTo(25, 13); ctx.lineTo(9, 10); ctx.lineTo(0, 29); ctx.lineTo(-9, 10); ctx.lineTo(-25, 13); ctx.lineTo(-31, -15); ctx.lineTo(-12, -9); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#e5ffea";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#173c2a";
+      ctx.fillRect(-6, -15, 12, 28);
+      ctx.fillStyle = enemy.supportFlash > 0 ? "#ffffff" : "#dfffe5";
+      ctx.fillRect(-12, -2, 24, 4);
+      ctx.fillRect(-2, -12, 4, 24);
+    } else if (enemy.type === "commander") {
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, -38); ctx.lineTo(13, -17); ctx.lineTo(38, -4); ctx.lineTo(30, 26); ctx.lineTo(8, 16); ctx.lineTo(0, 34); ctx.lineTo(-8, 16); ctx.lineTo(-30, 26); ctx.lineTo(-38, -4); ctx.lineTo(-13, -17); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#fff0b5";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#4e3d1d";
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(9, 2); ctx.lineTo(0, 18); ctx.lineTo(-9, 2); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#fff7cb";
+      [-15, 0, 15].forEach((x) => ctx.fillRect(x - 2, 20 - Math.abs(x) * 0.18, 4, 7));
+    } else if (enemy.type === "jammer") {
+      ctx.rotate(Math.sin(enemy.age * 2.2) * 0.1);
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, -30); ctx.lineTo(17, -15); ctx.lineTo(35, 0); ctx.lineTo(20, 23); ctx.lineTo(0, 16); ctx.lineTo(-20, 23); ctx.lineTo(-35, 0); ctx.lineTo(-17, -15); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#f9deff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#3c2250";
+      [-18, 18].forEach((x) => { ctx.beginPath(); ctx.arc(x, 2, 8, 0, TAU); ctx.fill(); });
+      ctx.strokeStyle = "#ffd7ff";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 12 + Math.sin(enemy.age * 5) * 2, 0, TAU); ctx.stroke();
+    } else if (enemy.type === "phantom") {
+      ctx.rotate(Math.sin(enemy.age * 3.8) * 0.18);
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, -34); ctx.lineTo(9, -8); ctx.lineTo(31, -19); ctx.lineTo(20, 3); ctx.lineTo(34, 20); ctx.lineTo(8, 14); ctx.lineTo(0, 31); ctx.lineTo(-8, 14); ctx.lineTo(-34, 20); ctx.lineTo(-20, 3); ctx.lineTo(-31, -19); ctx.lineTo(-9, -8); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#f4eaff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#281d4b";
+      ctx.beginPath(); ctx.moveTo(0, -21); ctx.lineTo(7, 2); ctx.lineTo(0, 17); ctx.lineTo(-7, 2); ctx.closePath(); ctx.fill();
+    } else if (enemy.type === "rammer") {
+      ctx.rotate(Math.sin(enemy.age * 7) * 0.08);
+      ctx.fillStyle = tint;
+      ctx.beginPath();
+      ctx.moveTo(0, 34); ctx.lineTo(15, 8); ctx.lineTo(9, -8); ctx.lineTo(4, -33); ctx.lineTo(0, -42); ctx.lineTo(-4, -33); ctx.lineTo(-9, -8); ctx.lineTo(-15, 8); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#ffe1d2";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#651d25";
+      ctx.fillRect(-3, -25, 6, 42);
+      ctx.fillStyle = "#fff1b0";
+      ctx.beginPath(); ctx.arc(0, 22, 4 + Math.sin(enemy.age * 12), 0, TAU); ctx.fill();
     } else if (enemy.type === "carrier") {
       ctx.fillStyle = tint;
       ctx.beginPath();
@@ -2309,6 +2901,8 @@
       ? weaponDefs[pickup.weapon].color
       : pickup.kind === "upgrade"
         ? "#8de7ff"
+        : pickup.kind === "rescue"
+          ? wingmanDefs[pickup.pilotRole]?.color || "#dff8ff"
         : pickup.kind === "bomb"
           ? "#ffd665"
           : "#69f7d0";
@@ -2317,13 +2911,13 @@
     ctx.rotate(pickup.spin);
     ctx.fillStyle = "rgba(2, 17, 16, 0.78)";
     ctx.beginPath();
-    ctx.arc(0, 0, pickup.kind === "armory" ? 24 : 20, 0, TAU); ctx.fill();
+    ctx.arc(0, 0, pickup.kind === "armory" ? 24 : pickup.kind === "rescue" ? 23 : 20, 0, TAU); ctx.fill();
     ctx.strokeStyle = color;
     ctx.lineWidth = pickup.kind === "armory" ? 2.5 : 2;
     ctx.shadowBlur = pickup.kind === "armory" ? 12 : 0;
     ctx.shadowColor = color;
     ctx.beginPath();
-    const edge = pickup.kind === "armory" ? 22 : 18;
+    const edge = pickup.kind === "armory" ? 22 : pickup.kind === "rescue" ? 20 : 18;
     ctx.moveTo(0, -edge); ctx.lineTo(edge - 1, 0); ctx.lineTo(0, edge); ctx.lineTo(-edge + 1, 0); ctx.closePath(); ctx.stroke();
     ctx.restore();
     if (pickup.kind === "armory") {
@@ -2341,12 +2935,16 @@
     ctx.font = "900 16px 'Avenir Next Condensed', 'DIN Condensed', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const label = pickup.kind === "weapon" || pickup.kind === "armory" ? weaponDefs[pickup.weapon].pickup : pickup.kind === "upgrade" ? "U" : pickup.kind === "bomb" ? "◆" : "+";
+    const label = pickup.kind === "weapon" || pickup.kind === "armory" ? weaponDefs[pickup.weapon].pickup : pickup.kind === "upgrade" ? "U" : pickup.kind === "rescue" ? wingmanDefs[pickup.pilotRole]?.icon || "W" : pickup.kind === "bomb" ? "◆" : "+";
     ctx.fillText(label, pickup.x, pickup.y + 1);
     if (pickup.kind === "armory") {
       ctx.fillStyle = "rgba(235, 248, 239, 0.78)";
       ctx.font = "900 7px 'Avenir Next Condensed', 'DIN Condensed', sans-serif";
       ctx.fillText("FIRE / CYCLE", pickup.x, pickup.y + 37);
+    } else if (pickup.kind === "rescue") {
+      ctx.fillStyle = "rgba(235, 248, 239, 0.86)";
+      ctx.font = "900 7px 'Avenir Next Condensed', 'DIN Condensed', sans-serif";
+      ctx.fillText("RESCUE LINK", pickup.x, pickup.y + 35);
     }
   }
 
@@ -2355,7 +2953,7 @@
     ctx.translate(bullet.x, bullet.y);
     const angle = Math.atan2(bullet.vy, bullet.vx) + Math.PI / 2;
     ctx.rotate(angle);
-    ctx.shadowBlur = bullet.overdrive ? 16 : bullet.rail || bullet.laser ? 12 : 6;
+    ctx.shadowBlur = bullet.overdrive || bullet.gravity ? 16 : bullet.rail || bullet.laser ? 12 : 6;
     ctx.shadowColor = bullet.color;
     ctx.fillStyle = bullet.color;
     if (enemy && bullet.enemyStyle === "orb") {
@@ -2375,6 +2973,25 @@
       ctx.fillRect(-1.2, -bullet.r, 2.4, bullet.r * 1.5);
     } else if (enemy && bullet.enemyStyle === "bolt") {
       ctx.fillRect(-bullet.r * 0.35, -bullet.r * 2.4, bullet.r * 0.7, bullet.r * 4.1);
+    } else if (bullet.gravity) {
+      ctx.fillStyle = "#090817";
+      ctx.beginPath(); ctx.arc(0, 0, bullet.r, 0, TAU); ctx.fill();
+      ctx.strokeStyle = bullet.color;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.72;
+      ctx.beginPath(); ctx.arc(0, 0, bullet.r + 5 + Math.sin((bullet.age || 0) * 12) * 2, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath(); ctx.arc(0, 0, bullet.r + 10, Math.PI * 0.2, Math.PI * 1.4); ctx.stroke();
+    } else if (bullet.blade) {
+      ctx.rotate((bullet.age || 0) * 15);
+      ctx.beginPath(); ctx.moveTo(0, -bullet.r * 1.45); ctx.lineTo(bullet.r * 0.72, 0); ctx.lineTo(0, bullet.r * 1.45); ctx.lineTo(-bullet.r * 0.72, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#fff4de";
+      ctx.beginPath(); ctx.moveTo(0, -bullet.r * 0.55); ctx.lineTo(2.5, 0); ctx.lineTo(0, bullet.r * 0.55); ctx.lineTo(-2.5, 0); ctx.closePath(); ctx.fill();
+    } else if (bullet.chain) {
+      ctx.fillRect(-1.5, -11, 3, 22);
+      ctx.fillRect(-7, -1.5, 14, 3);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-1, -7, 2, 14);
     } else if (bullet.plasma) {
       ctx.beginPath(); ctx.arc(0, 0, bullet.r, 0, TAU); ctx.fill();
       ctx.fillStyle = "#fff5d6"; ctx.beginPath(); ctx.arc(0, 0, bullet.r * 0.35, 0, TAU); ctx.fill();
@@ -2452,13 +3069,17 @@
     if (shake) ctx.translate(random(-shake, shake), random(-shake * 0.55, shake * 0.55));
     drawBackdrop();
     drawEnvironment();
+    drawTacticalLinks();
     drawRings();
     drawAlly();
+    drawWingman();
     state.pickups.forEach(drawPickup);
     state.bullets.forEach((bullet) => drawBullet(bullet));
     state.enemyBullets.forEach((bullet) => drawBullet(bullet, true));
     state.enemies.forEach(drawEnemy);
+    drawArcs();
     drawPlayer();
+    drawJammerInterference();
     drawParticles();
     drawBossIndicator();
     if (state.flash > 0) {
@@ -2506,10 +3127,30 @@
       objectiveCard.classList.toggle("is-complete", mission.success);
       objectiveCard.classList.toggle("is-failed", mission.resolved && !mission.success);
     }
-    ui.environmentLabel.textContent = `${state.environment?.name || "AIRSPACE NOMINAL"} // SIGNAL ${state.signalFragments}/4`;
+    ui.environmentLabel.textContent = `${state.environment?.name || "AIRSPACE NOMINAL"} // SIGNAL ${state.signalFragments}/4${state.jamStrength > 0.08 ? ` // JAM ${Math.round(state.jamStrength * 100)}%` : ""}`;
     const module = moduleDefs[state.module] || moduleDefs.none;
     ui.moduleName.textContent = state.module === "aegis" && player ? `${module.name} // ${player.moduleCharges}` : module.name;
     ui.moduleChip.style.borderColor = module.color;
+    if (state.wingman) {
+      const wingman = state.wingman;
+      const wingmanDef = wingmanDefs[wingman.role];
+      ui.wingmanIcon.textContent = wingmanDef.icon;
+      ui.wingmanName.textContent = wingmanDef.name;
+      ui.wingmanRole.textContent = `${wingmanDef.role} // ${state.wingmanRoster.length} LINKED`;
+      ui.wingmanStatus.textContent = wingman.cooldown <= 0 ? "READY" : `${wingman.cooldown.toFixed(1)}s`;
+      ui.wingmanButton.style.setProperty("--wing-color", wingmanDef.color);
+      ui.wingmanButton.classList.add("is-online");
+      ui.wingmanButton.classList.toggle("is-switchable", state.wingmanRoster.length > 1);
+      ui.wingmanButton.setAttribute("aria-label", state.wingmanRoster.length > 1 ? `切换僚机，当前 ${wingmanDef.name}` : `当前僚机 ${wingmanDef.name}`);
+    } else {
+      ui.wingmanIcon.textContent = "+";
+      ui.wingmanName.textContent = "NO WINGMAN";
+      ui.wingmanRole.textContent = "RESCUE LINK // STANDBY";
+      ui.wingmanStatus.textContent = "OFFLINE";
+      ui.wingmanButton.style.setProperty("--wing-color", "#6f8f86");
+      ui.wingmanButton.classList.remove("is-online", "is-switchable");
+      ui.wingmanButton.setAttribute("aria-label", "尚未营救僚机");
+    }
     if (!player) return;
     const def = weaponDefs[player.weapon];
     const health = Math.max(0, Math.round(player.hp));
@@ -2544,6 +3185,7 @@
       start: [220, 660, "sine", 0.07, 0.18],
       shoot: [520, 280, "square", volume || 0.022, 0.045],
       rail: [180, 70, "sawtooth", 0.05, 0.1],
+      gravity: [105, 32, "sine", volume || 0.045, 0.24],
       enemy: [145, 110, "triangle", volume || 0.02, 0.05],
       explode: [92, 38, "sawtooth", 0.04, 0.18],
       boss: [120, 28, "sawtooth", 0.1, 0.42],
@@ -2558,6 +3200,10 @@
       phase: [160, 620, "square", 0.065, 0.28],
       part: [210, 68, "sawtooth", 0.075, 0.24],
       shield: [840, 310, "sine", 0.06, 0.2],
+      repair: [360, 720, "sine", volume || 0.025, 0.12],
+      rescue: [310, 980, "triangle", 0.07, 0.3],
+      wingman: [260, 780, "triangle", 0.055, 0.22],
+      "wingman-shot": [430, 190, "square", volume || 0.018, 0.06],
       lightning: [1200, 58, "sawtooth", 0.07, 0.2],
       heat: [92, 42, "sawtooth", 0.055, 0.24],
       level: [190, 720, "sine", 0.065, 0.32],
@@ -2614,7 +3260,7 @@
   }
 
   window.addEventListener("keydown", (event) => {
-    const codes = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS", "Space", "KeyP", "Escape", "Enter", "Digit1", "Digit2"];
+    const codes = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS", "KeyC", "Space", "KeyP", "Escape", "Enter", "Digit1", "Digit2"];
     if (codes.includes(event.code)) event.preventDefault();
     if (state.routeOpen && (event.code === "Digit1" || event.code === "Digit2")) {
       const route = currentLevelDef().routes[event.code === "Digit1" ? 0 : 1];
@@ -2627,6 +3273,7 @@
       return;
     }
     if ((event.code === "KeyP" || event.code === "Escape") && !event.repeat) { pauseGame(); return; }
+    if (event.code === "KeyC" && !event.repeat) { cycleWingman(); return; }
     if (event.code === "Enter" && !event.repeat && (!state.running || state.gameOver)) { startGame(); return; }
     state.keys.add(event.code);
     resumeAudio();
@@ -2662,7 +3309,39 @@
   canvas.addEventListener("lostpointercapture", (event) => releasePointer(event));
   ui.deploy.addEventListener("click", startGame);
   ui.pause.addEventListener("click", pauseGame);
+  ui.wingmanButton.addEventListener("click", () => { resumeAudio(); cycleWingman(); });
   ui.mobileSpecial.addEventListener("click", () => { resumeAudio(); triggerSpecial(); });
+
+  if (new URLSearchParams(window.location.search).has("debug")) {
+    window.__skybreakerDebug = {
+      state,
+      startGame,
+      spawnEnemy,
+      spawnPickup,
+      deployWingman: (role) => {
+        if (!state.wingmanRoster.includes(role)) state.wingmanRoster.push(role);
+        deployWingman(role, false);
+      },
+      setWeapon: (weapon, level = 1) => {
+        if (!weaponDefs[weapon] || !state.player) return;
+        state.player.weapon = weapon;
+        state.player.weaponLevel = clamp(level, 1, 3);
+        state.player.fireCooldown = 0;
+      },
+      snapshot: () => ({
+        level: state.level,
+        phase: state.levelPhase,
+        weapon: state.player?.weapon,
+        weaponLevel: state.player?.weaponLevel,
+        wingman: state.wingman?.role || null,
+        roster: [...state.wingmanRoster],
+        enemies: state.enemies.map((enemy) => ({ type: enemy.type, hp: enemy.hp, shielded: Boolean(tacticalSourceFor(enemy, "shield", 178)), cloaked: enemy.cloaked })),
+        bullets: state.bullets.map((bullet) => ({ type: bullet.type, chain: Boolean(bullet.chain), gravity: Boolean(bullet.gravity), blade: Boolean(bullet.blade), returning: Boolean(bullet.returning) })),
+        arcs: state.arcs.length,
+        jamStrength: state.jamStrength,
+      }),
+    };
+  }
 
   fitCanvas();
   initBackdrop();
